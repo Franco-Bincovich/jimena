@@ -1,0 +1,18 @@
+{
+  "experimentalServices": {
+    "frontend": {
+      "entrypoint": "frontend",
+      "routePrefix": "/"
+    },
+    "backend": {
+      "entrypoint": "backend",
+      "routePrefix": "/_/backend"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/admin/limpiar-pdfs",
+      "schedule": "0 3 * * 1"
+    }
+  ]
+}

@@ -3,9 +3,9 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-SQLITE_URL = "sqlite:///./sistema_facturas.db"
+from config.settings import settings
 
-engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(settings.database_url, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

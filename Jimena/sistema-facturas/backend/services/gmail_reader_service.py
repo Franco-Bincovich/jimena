@@ -101,6 +101,13 @@ def _procesar_mensaje(
     if cliente:
         factura_repo.create_cliente_asociado(db, factura.id, cliente.id)
 
+    try:
+        from services import storage_service  # lazy — evita importación circular
+        storage_url = storage_service.subir_pdf(pdf_path, stored_name)
+        factura_repo.update(db, factura.id, {"drive_url": storage_url})
+    except Exception as exc:
+        logger.error("Error subiendo PDF a Supabase Storage", extra={"archivo": stored_name, "error": str(exc)})
+
     logger.info("Factura detectada", extra={"proveedor": proveedor.nombre, "message_id": message_id})
     return {"factura_id": factura.id, "proveedor": proveedor.nombre, "archivo": stored_name}
 
