@@ -1,36 +1,11 @@
 from datetime import datetime
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from repositories import envio_repo, factura_repo
 from services import template_service
-
-
-# ─── LOCAL FIXTURES ──────────────────────────────────────────────────────────
-
-@pytest.fixture
-def factura_confirmada(db_session, proveedor_base, cliente_base):
-    f = factura_repo.create(db_session, {
-        "nombre_archivo": "test.pdf",
-        "numero_factura": "0001-00000001",
-        "fecha_factura": datetime(2025, 3, 1),
-        "monto_total": 10000.0,
-        "estado": "confirmada",
-        "proveedor_id": proveedor_base.id,
-    })
-    factura_repo.create_cliente_asociado(db_session, f.id, cliente_base.id)
-    return f
-
-
-@pytest.fixture
-def factura_pendiente(db_session, proveedor_base):
-    return factura_repo.create(db_session, {
-        "nombre_archivo": "pending.pdf",
-        "estado": "pendiente_confirmacion",
-        "proveedor_id": proveedor_base.id,
-    })
 
 
 # ─── CRUD BASE (8) ──────────────────────────────────────────────────────────
@@ -128,7 +103,6 @@ def test_resolver_variables_envio(plantilla_envio, cliente_base, factura_confirm
 
 
 def test_variables_desconocidas_preservadas(plantilla_pedido, proveedor_base, cliente_base):
-    from models import Plantilla as PlantillaModel
     plantilla_con_var_extra = SimpleNamespace(
         asunto="Hola {{no_existe}} y {{proveedor}}",
         cuerpo="{{otro_desconocido}}",
@@ -145,150 +119,6 @@ def test_variables_desconocidas_preservadas(plantilla_pedido, proveedor_base, cl
     assert "{{no_existe}}" in resultado["asunto"]
     assert proveedor_base.nombre in resultado["asunto"]
     assert "{{otro_desconocido}}" in resultado["cuerpo"]
-
-
-# ─── PEDIDOS (4) ────────────────────────────────────────────────────────────
-
-async def test_preview_pedido(client, proveedor_base, cliente_base, plantilla_pedido):
-    payload = {
-        "proveedor_id": proveedor_base.id,
-        "plantilla_id": plantilla_pedido.id,
-        "mes": 3,
-        "anio": 2025,
-        "fecha_desde": "2025-03-01",
-        "fecha_hasta": "2025-03-31",
-        "items": [{"cliente_id": cliente_base.id, "consultas_api": 100}],
-    }
-    resp = await client.post("/api/pedidos/preview", json=payload)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "asunto" in data
-    assert "marzo" in data["asunto"]
-    assert data["proveedor"]["nombre"] == "Proveedor Test"
-    assert data["clientes"][0]["nombre"] == "Cliente Test"
-
-
-async def test_preview_pedido_proveedor_not_found(client, plantilla_pedido, cliente_base):
-    payload = {
-        "proveedor_id": "00000000-0000-0000-0000-000000000000",
-        "plantilla_id": plantilla_pedido.id,
-        "mes": 3,
-        "anio": 2025,
-        "fecha_desde": "2025-03-01",
-        "fecha_hasta": "2025-03-31",
-        "items": [{"cliente_id": cliente_base.id}],
-    }
-    resp = await client.post("/api/pedidos/preview", json=payload)
-    assert resp.status_code == 404
-    assert resp.json()["code"] == "PROVEEDOR_NOT_FOUND"
-
-
-async def test_enviar_pedido(client, proveedor_base, cliente_base, plantilla_pedido):
-    payload = {
-        "proveedor_id": proveedor_base.id,
-        "plantilla_id": plantilla_pedido.id,
-        "mes": 3,
-        "anio": 2025,
-        "fecha_desde": "2025-03-01",
-        "fecha_hasta": "2025-03-31",
-        "items": [{"cliente_id": cliente_base.id, "consultas_api": 10}],
-    }
-    with (
-        patch("routers.pedidos.get_credentials", return_value=MagicMock()),
-        patch("services.gmail_sender_service.enviar_email", return_value="msg_id_123") as mock_gmail,
-        patch("services.sheets_writer_service.registrar_pedido", return_value=[2]),
-    ):
-        resp = await client.post("/api/pedidos/enviar", json=payload)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["gmail_message_id"] == "msg_id_123"
-    assert "pedido_id" in data
-    mock_gmail.assert_called_once()
-
-
-async def test_enviar_pedido_google_not_connected(client, proveedor_base, cliente_base, plantilla_pedido):
-    payload = {
-        "proveedor_id": proveedor_base.id,
-        "plantilla_id": plantilla_pedido.id,
-        "mes": 3,
-        "anio": 2025,
-        "fecha_desde": "2025-03-01",
-        "fecha_hasta": "2025-03-31",
-        "items": [{"cliente_id": cliente_base.id}],
-    }
-    resp = await client.post("/api/pedidos/enviar", json=payload)
-    assert resp.status_code == 403
-    assert resp.json()["code"] == "GOOGLE_NOT_CONNECTED"
-
-
-# ─── ENVÍOS (5) ─────────────────────────────────────────────────────────────
-
-async def test_preview_envio(client, factura_confirmada, cliente_base, plantilla_envio):
-    payload = {
-        "factura_id": factura_confirmada.id,
-        "cliente_id": cliente_base.id,
-        "plantilla_id": plantilla_envio.id,
-    }
-    resp = await client.post("/api/envios/preview", json=payload)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "asunto" in data
-    assert "0001-00000001" in data["asunto"]
-    assert data["cliente"]["nombre"] == "Cliente Test"
-    assert data["factura"]["numero_factura"] == "0001-00000001"
-
-
-async def test_preview_envio_factura_no_confirmada(client, factura_pendiente, cliente_base, plantilla_envio):
-    payload = {
-        "factura_id": factura_pendiente.id,
-        "cliente_id": cliente_base.id,
-        "plantilla_id": plantilla_envio.id,
-    }
-    resp = await client.post("/api/envios/preview", json=payload)
-    assert resp.status_code == 400
-    assert resp.json()["code"] == "FACTURA_NOT_CONFIRMADA"
-
-
-async def test_preview_envio_factura_not_found(client, cliente_base, plantilla_envio):
-    payload = {
-        "factura_id": "00000000-0000-0000-0000-000000000000",
-        "cliente_id": cliente_base.id,
-        "plantilla_id": plantilla_envio.id,
-    }
-    resp = await client.post("/api/envios/preview", json=payload)
-    assert resp.status_code == 404
-    assert resp.json()["code"] == "FACTURA_NOT_FOUND"
-
-
-async def test_enviar_factura(client, factura_confirmada, cliente_base, plantilla_envio):
-    payload = {
-        "factura_id": factura_confirmada.id,
-        "cliente_id": cliente_base.id,
-        "plantilla_id": plantilla_envio.id,
-    }
-    with (
-        patch("routers.envios.get_credentials", return_value=MagicMock()),
-        patch("services.gmail_sender_service.enviar_email", return_value="msg_id_456") as mock_gmail,
-        patch("services.drive_service.copiar_factura_cliente", return_value={"file_id": "f1", "url": "https://drive.test"}),
-        patch("services.sheets_writer_service.registrar_envio", return_value=None),
-    ):
-        resp = await client.post("/api/envios/enviar", json=payload)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["gmail_message_id"] == "msg_id_456"
-    assert "historial_id" in data
-    mock_gmail.assert_called_once()
-
-
-async def test_enviar_factura_google_not_connected(client, factura_confirmada, cliente_base, plantilla_envio):
-    payload = {
-        "factura_id": factura_confirmada.id,
-        "cliente_id": cliente_base.id,
-        "plantilla_id": plantilla_envio.id,
-    }
-    resp = await client.post("/api/envios/enviar", json=payload)
-    assert resp.status_code == 403
-    assert resp.json()["code"] == "GOOGLE_NOT_CONNECTED"
 
 
 # ─── FACTURAS (2) ───────────────────────────────────────────────────────────

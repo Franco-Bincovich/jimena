@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -19,7 +21,7 @@ async def crear(data: ContactoCCCreate, db: Session = Depends(get_db)):
 
 
 @router.delete("/{contacto_id}", status_code=204)
-async def eliminar(contacto_id: str, db: Session = Depends(get_db)):
-    deleted = contacto_cc_repo.delete(db, contacto_id)
+async def eliminar(contacto_id: UUID, db: Session = Depends(get_db)):
+    deleted = contacto_cc_repo.delete(db, str(contacto_id))
     if not deleted:
         raise HTTPException(status_code=404, detail="Contacto no encontrado")
