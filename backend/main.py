@@ -3,14 +3,12 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import Response
 
 import models  # noqa: F401 — registra los modelos en Base.metadata
-from database import Base, engine
+from database import Base
 from middleware.error_handler import app_error_handler, unexpected_error_handler
 from routers import clientes, contactos_cc, envios, facturas, pedidos, plantillas, proveedores
 from routers import google_auth
 from routers import config as config_router
 from utils.errors import AppError
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Sistema Facturas", version="0.1.0")
 
