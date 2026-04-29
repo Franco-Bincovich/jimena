@@ -7,6 +7,7 @@ from database import Base
 from middleware.error_handler import app_error_handler, unexpected_error_handler
 from routers import clientes, contactos_cc, envios, facturas, pedidos, plantillas, proveedores
 from routers import google_auth
+from routers import admin as admin_router
 from routers import config as config_router
 from utils.errors import AppError
 
@@ -44,6 +45,7 @@ app.include_router(config_router.router, prefix="/api")
 app.include_router(facturas.router, prefix="/api")
 app.include_router(pedidos.router, prefix="/api")
 app.include_router(envios.router, prefix="/api")
+app.include_router(admin_router.router, prefix="/api")
 
 
 @app.get("/health")

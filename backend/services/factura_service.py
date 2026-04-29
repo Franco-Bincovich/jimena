@@ -83,12 +83,16 @@ def confirmar(db: Session, factura_id: str, data) -> dict:
     nombre_prov = factura.proveedor.nombre if factura.proveedor else "Sin_Proveedor"
     _intentar_subida_drive(factura.id, factura.nombre_archivo, nombre_prov, db)
     factura = factura_repo.find_by_id(db, factura_id)
+    if not factura.drive_url and factura.nombre_archivo:
+        _intentar_url_supabase(factura.id, factura.nombre_archivo, db)
+        factura = factura_repo.find_by_id(db, factura_id)
     return _to_dict(factura)
 
 
 def eliminar(db: Session, factura_id: str) -> None:
     """
-    Elimina la factura de la DB y borra el PDF físico de uploads/ si existe.
+    Elimina la factura de la DB, borra el PDF físico de uploads/ si existe
+    y elimina el archivo de Supabase Storage (best-effort).
 
     Args:
         db: Sesión de base de datos.
@@ -101,9 +105,26 @@ def eliminar(db: Session, factura_id: str) -> None:
     if not factura:
         raise AppError("Factura no encontrada", "FACTURA_NOT_FOUND", 404)
     pdf_path = os.path.join("uploads", factura.nombre_archivo)
+    nombre_archivo = factura.nombre_archivo
     factura_repo.delete(db, factura_id)
     if os.path.exists(pdf_path):
         os.remove(pdf_path)
+    try:
+        from services import storage_service  # lazy — evita importación circular
+        storage_service.eliminar_pdf(nombre_archivo)
+    except Exception as exc:
+        logger.error("Error eliminando PDF de Supabase Storage", extra={"archivo": nombre_archivo, "error": str(exc)})
+
+
+def _intentar_url_supabase(factura_id: str, nombre_archivo: str, db: Session) -> None:
+    """Actualiza drive_url con la URL pública de Supabase Storage como fallback cuando Drive no está configurado."""
+    try:
+        from services import storage_service  # lazy — evita importación circular
+        client = storage_service.get_supabase_client()
+        url = client.storage.from_("Facturas").get_public_url(nombre_archivo)
+        factura_repo.update(db, factura_id, {"drive_url": url})
+    except Exception as exc:
+        logger.error("Error obteniendo URL de Supabase Storage", extra={"factura_id": factura_id, "error": str(exc)})
 
 
 def _intentar_subida_drive(factura_id: str, nombre_archivo: str, nombre_proveedor: str, db: Session) -> None:
