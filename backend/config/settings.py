@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     supabase_service_key: str = ""
 
     allowed_origins: str = "http://localhost:5173,http://localhost:4173"
+    frontend_url: str = "http://localhost:5173"
 
     class Config:
         env_file = ".env"

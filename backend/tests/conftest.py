@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -8,6 +10,7 @@ from sqlalchemy.pool import StaticPool
 from database import Base, get_db
 from main import app
 from models import Cliente, Plantilla, Proveedor
+from repositories import factura_repo
 
 TEST_DB_URL = "sqlite:///:memory:"
 
@@ -84,3 +87,26 @@ def plantilla_envio(db_session):
     db_session.commit()
     db_session.refresh(p)
     return p
+
+
+@pytest.fixture
+def factura_confirmada(db_session, proveedor_base, cliente_base):
+    f = factura_repo.create(db_session, {
+        "nombre_archivo": "test.pdf",
+        "numero_factura": "0001-00000001",
+        "fecha_factura": datetime(2025, 3, 1),
+        "monto_total": 10000.0,
+        "estado": "confirmada",
+        "proveedor_id": proveedor_base.id,
+    })
+    factura_repo.create_cliente_asociado(db_session, f.id, cliente_base.id)
+    return f
+
+
+@pytest.fixture
+def factura_pendiente(db_session, proveedor_base):
+    return factura_repo.create(db_session, {
+        "nombre_archivo": "pending.pdf",
+        "estado": "pendiente_confirmacion",
+        "proveedor_id": proveedor_base.id,
+    })

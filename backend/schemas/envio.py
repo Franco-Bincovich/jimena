@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class ClienteEnvioItem(BaseModel):
@@ -30,7 +30,7 @@ class EnvioPreviewRequest(BaseModel):
 class EnvioEnviarRequest(EnvioPreviewRequest):
     asunto_override: Optional[str] = None
     cuerpo_override: Optional[str] = None
-    cc: list[str] = []
+    cc: list[EmailStr] = []
 
 
 class _ClienteOut(BaseModel):

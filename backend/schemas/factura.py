@@ -1,7 +1,8 @@
 from datetime import date, datetime
 from typing import List, Optional
+from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProveedorSimple(BaseModel):
@@ -42,11 +43,11 @@ class FacturaResponse(BaseModel):
 
 
 class FacturaConfirmar(BaseModel):
-    numero_factura: Optional[str] = None
+    numero_factura: Optional[str] = Field(default=None, max_length=100)
     fecha_factura: Optional[str] = None  # formato DD/MM/YYYY
     fecha_desde: Optional[str] = None    # formato DD/MM/YYYY
     fecha_hasta: Optional[str] = None    # formato DD/MM/YYYY
     monto_total: Optional[float] = None
-    descripcion: Optional[str] = None
-    proveedor_id: Optional[str] = None
-    cliente_ids: List[str] = []
+    descripcion: Optional[str] = Field(default=None, max_length=1000)
+    proveedor_id: Optional[UUID] = None
+    cliente_ids: List[UUID] = []

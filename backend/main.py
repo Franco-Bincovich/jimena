@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 import models  # noqa: F401 — registra los modelos en Base.metadata
@@ -13,8 +15,34 @@ from routers import config as config_router
 from utils.errors import AppError
 
 _ALLOWED_ORIGINS = {o.strip() for o in settings.allowed_origins.split(",") if o.strip()}
+_MAX_PAYLOAD_BYTES = 10 * 1024 * 1024  # 10 MB — cubre PDFs adjuntos
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        return response
+
 
 app = FastAPI(title="Sistema Facturas", version="0.1.0")
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+@app.middleware("http")
+async def limit_payload_size(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > _MAX_PAYLOAD_BYTES:
+        return JSONResponse(
+            status_code=413,
+            content={"error": True, "message": "Payload demasiado grande", "code": "PAYLOAD_TOO_LARGE"},
+        )
+    return await call_next(request)
 
 
 @app.middleware("http")
