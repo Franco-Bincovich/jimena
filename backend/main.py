@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import Response
 
 import models  # noqa: F401 — registra los modelos en Base.metadata
+from config.settings import settings
 from database import Base
 from middleware.error_handler import app_error_handler, unexpected_error_handler
 from routers import clientes, contactos_cc, envios, facturas, pedidos, plantillas, proveedores
@@ -11,23 +12,29 @@ from routers import admin as admin_router
 from routers import config as config_router
 from utils.errors import AppError
 
+_ALLOWED_ORIGINS = {o.strip() for o in settings.allowed_origins.split(",") if o.strip()}
+
 app = FastAPI(title="Sistema Facturas", version="0.1.0")
 
 
 @app.middleware("http")
 async def cors_middleware(request: Request, call_next):
+    origin = request.headers.get("origin", "")
+    allow_origin = origin if origin in _ALLOWED_ORIGINS else ""
+
     if request.method == "OPTIONS":
         response = Response()
-        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Origin"] = allow_origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         response.headers["Access-Control-Allow-Headers"] = "*"
         return response
     response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    if allow_origin:
+        response.headers["Access-Control-Allow-Origin"] = allow_origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
 
