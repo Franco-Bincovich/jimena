@@ -1,6 +1,5 @@
 from datetime import timezone
-
-from google.oauth2.credentials import Credentials as _BaseCredentials
+from google.oauth2.credentials import Credentials
 
 
 def _to_aware(dt):
@@ -9,18 +8,12 @@ def _to_aware(dt):
     return dt
 
 
-class PatchedCredentials(_BaseCredentials):
-    """
-    Subclase de Credentials que garantiza que expiry siempre sea timezone-aware.
-    La librería google-auth llama credentials.valid (que compara expiry con utcnow())
-    en cada .execute(). Si expiry es naive y utcnow() es aware (o viceversa) lanza
-    TypeError. Esta subclase normaliza el valor en getter y setter para que nunca ocurra.
-    """
-
+class PatchedCredentials(Credentials):
     @property
     def expiry(self):
-        return _to_aware(super().expiry)
+        exp = self.__dict__.get("_expiry")
+        return _to_aware(exp)
 
     @expiry.setter
     def expiry(self, value):
-        _BaseCredentials.expiry.fset(self, _to_aware(value))
+        self.__dict__["_expiry"] = _to_aware(value)
