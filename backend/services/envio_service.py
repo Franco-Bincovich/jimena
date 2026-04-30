@@ -101,17 +101,6 @@ def enviar(
 
     if factura:
         drive_url = factura.drive_url or ""
-        if factura.drive_file_id:
-            try:
-                resultado = drive_service.copiar_factura_cliente(
-                    factura.drive_file_id, cliente_principal.nombre, db
-                )
-                drive_url = resultado["url"]
-            except Exception as exc:
-                logger.error(
-                    "Error copiando a Drive (best-effort)",
-                    extra={"file_id": factura.drive_file_id, "error": str(exc)},
-                )
         try:
             sheets_writer_service.registrar_envio(factura, cliente_principal, drive_url, None, db)
         except Exception as exc:
