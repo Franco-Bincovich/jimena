@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from sqlalchemy.orm import Session
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -74,28 +72,17 @@ def get_credentials(db: Session) -> Credentials:
 
     from config.settings import settings  # lazy — solo se necesita cuando hay refresh_token
 
-    expiry = config.token_expiry
-    if expiry is not None and expiry.tzinfo is None:
-        expiry = expiry.replace(tzinfo=timezone.utc)
-
     credentials = Credentials(
         token=config.access_token,
         refresh_token=config.refresh_token,
         token_uri=_TOKEN_URI,
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
-        expiry=expiry,
+        expiry=config.token_expiry,
         scopes=SCOPES,
     )
-    # La librería de Google llama credentials.valid internamente al hacer requests,
-    # lo que falla si expiry es naive. Se parchea el atributo directo para que
-    # cualquier acceso posterior a .valid no lance TypeError.
-    if credentials.expiry is not None and credentials.expiry.tzinfo is None:
-        credentials.expiry = credentials.expiry.replace(tzinfo=timezone.utc)
 
-    now = datetime.now(timezone.utc)
-    token_expired = credentials.expiry is None or credentials.expiry <= now
-    if not credentials.token or token_expired:
+    if not credentials.valid:
         credentials.refresh(Request())
         google_config_repo.upsert(db, {
             "access_token": credentials.token,

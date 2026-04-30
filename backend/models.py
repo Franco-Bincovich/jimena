@@ -141,7 +141,7 @@ class GoogleConfig(Base):
     id = Column(Integer, primary_key=True)
     access_token = Column(Text, nullable=True)
     refresh_token = Column(Text, nullable=True)
-    token_expiry = Column(DateTime, nullable=True)
+    token_expiry = Column(DateTime(timezone=True), nullable=True)
     sheet_id = Column(String(200), nullable=True)
     drive_folder_id = Column(String(200), nullable=True)
     empresa_nombre = Column(String(200), nullable=True)
