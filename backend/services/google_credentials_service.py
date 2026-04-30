@@ -1,8 +1,6 @@
-from datetime import datetime, timezone
-
 from sqlalchemy.orm import Session
 from google.auth.transport.requests import Request
-from utils.google_credentials_patch import PatchedCredentials as Credentials
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 
 from repositories import google_config_repo
@@ -56,8 +54,7 @@ def get_flow() -> Flow:
 
 def get_credentials(db: Session) -> Credentials:
     """
-    Lee los tokens de GoogleConfig y devuelve Credentials válidas.
-    Refresca el access_token automáticamente si expiró.
+    Lee los tokens de GoogleConfig, refresca el access_token y devuelve Credentials listas.
 
     Args:
         db: Sesión de base de datos.
@@ -74,11 +71,6 @@ def get_credentials(db: Session) -> Credentials:
 
     from config.settings import settings  # lazy — solo se necesita cuando hay refresh_token
 
-    # Normalizar expiry a timezone-aware ANTES de construir el objeto
-    expiry = config.token_expiry
-    if expiry is not None and expiry.tzinfo is None:
-        expiry = expiry.replace(tzinfo=timezone.utc)
-
     credentials = Credentials(
         token=config.access_token,
         refresh_token=config.refresh_token,
@@ -88,28 +80,11 @@ def get_credentials(db: Session) -> Credentials:
         scopes=SCOPES,
     )
 
-    # Parchear expiry directamente en el objeto para que la librería
-    # de Google no falle al comparar naive vs aware
-    if expiry is not None:
-        credentials.expiry = expiry
-
-    # Verificar expiración manualmente sin tocar credentials.valid
-    now = datetime.now(timezone.utc)
-    token_expiry = credentials.expiry
-    if token_expiry is not None and token_expiry.tzinfo is None:
-        token_expiry = token_expiry.replace(tzinfo=timezone.utc)
-
-    needs_refresh = (
-        not credentials.token or
-        (token_expiry is not None and now >= token_expiry)
-    )
-
-    if needs_refresh:
-        credentials.refresh(Request())
-        google_config_repo.upsert(db, {
-            "access_token": credentials.token,
-            "refresh_token": credentials.refresh_token,
-            "token_expiry": credentials.expiry,
-        })
+    credentials.refresh(Request())
+    google_config_repo.upsert(db, {
+        "access_token": credentials.token,
+        "refresh_token": credentials.refresh_token,
+        "token_expiry": credentials.expiry,
+    })
 
     return credentials
