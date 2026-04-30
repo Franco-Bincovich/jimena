@@ -72,13 +72,18 @@ def get_credentials(db: Session) -> Credentials:
 
     from config.settings import settings  # lazy — solo se necesita cuando hay refresh_token
 
+    from datetime import timezone as tz
+    _expiry = config.token_expiry
+    if _expiry is not None and _expiry.tzinfo is None:
+        _expiry = _expiry.replace(tzinfo=tz.utc)
+
     credentials = Credentials(
         token=config.access_token,
         refresh_token=config.refresh_token,
         token_uri=_TOKEN_URI,
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
-        expiry=config.token_expiry,
+        expiry=_expiry,
         scopes=SCOPES,
     )
 
