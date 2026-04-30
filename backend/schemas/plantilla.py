@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -36,11 +35,16 @@ class PlantillaUpdate(BaseModel):
 
 
 class PlantillaResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
+    model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    id: str
     nombre: str
     tipo: str
     asunto: str
     cuerpo: str
     created_at: datetime
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v

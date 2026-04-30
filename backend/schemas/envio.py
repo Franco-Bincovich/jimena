@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class ClienteEnvioItem(BaseModel):
@@ -60,18 +60,23 @@ class _ProveedorSummary(BaseModel):
 
 
 class HistorialEnvioResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
+    model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    id: str
     tipo: str
     destinatario_email: str
     destinatario_nombre: Optional[str] = None
     asunto: str
     estado: str
     error_msg: Optional[str] = None
-    factura_id: Optional[UUID] = None
+    factura_id: Optional[str] = None
     gmail_message_id: Optional[str] = None
     sheets_row: Optional[int] = None
     created_at: datetime
     factura: Optional[_FacturaSummary] = None
     proveedor: Optional[_ProveedorSummary] = None
+
+    @field_validator('id', 'factura_id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v

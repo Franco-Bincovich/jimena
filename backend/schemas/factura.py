@@ -2,27 +2,37 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ProveedorSimple(BaseModel):
-    id: UUID
+    id: str
     nombre: str
     email: Optional[str] = None
 
-    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
 
 
 class ClienteSimple(BaseModel):
-    id: UUID
+    id: str
     nombre: str
     cuit: Optional[str] = None
 
-    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
 
 
 class FacturaResponse(BaseModel):
-    id: UUID
+    id: str
     nombre_archivo: str
     numero_factura: Optional[str] = None
     fecha_factura: Optional[datetime] = None
@@ -39,7 +49,12 @@ class FacturaResponse(BaseModel):
     proveedor: Optional[ProveedorSimple] = None
     clientes: List[ClienteSimple] = []
 
-    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
 
 
 class FacturaConfirmar(BaseModel):

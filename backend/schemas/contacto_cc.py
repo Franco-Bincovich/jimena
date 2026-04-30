@@ -1,7 +1,6 @@
 from datetime import datetime
-from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class ContactoCCCreate(BaseModel):
@@ -10,9 +9,14 @@ class ContactoCCCreate(BaseModel):
 
 
 class ContactoCCResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
+    model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    id: str
     nombre: str
     email: str
     created_at: datetime
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
