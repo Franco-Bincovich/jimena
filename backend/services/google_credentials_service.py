@@ -87,14 +87,14 @@ def get_credentials(db: Session) -> Credentials:
         expiry=expiry,
         scopes=SCOPES,
     )
+    # La librería de Google llama credentials.valid internamente al hacer requests,
+    # lo que falla si expiry es naive. Se parchea el atributo directo para que
+    # cualquier acceso posterior a .valid no lance TypeError.
+    if credentials.expiry is not None and credentials.expiry.tzinfo is None:
+        credentials.expiry = credentials.expiry.replace(tzinfo=timezone.utc)
 
     now = datetime.now(timezone.utc)
-    expiry_aware = (
-        credentials.expiry.replace(tzinfo=timezone.utc)
-        if credentials.expiry is not None and credentials.expiry.tzinfo is None
-        else credentials.expiry
-    )
-    token_expired = expiry_aware is None or expiry_aware <= now
+    token_expired = credentials.expiry is None or credentials.expiry <= now
     if not credentials.token or token_expired:
         credentials.refresh(Request())
         google_config_repo.upsert(db, {
