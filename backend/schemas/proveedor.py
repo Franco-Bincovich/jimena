@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -19,9 +20,9 @@ class ProveedorUpdate(BaseModel):
 
 
 class ProveedorResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
 
-    id: str
+    id: UUID
     nombre: str
     email: Optional[str]
     cuit: Optional[str]

@@ -6,23 +6,23 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProveedorSimple(BaseModel):
-    id: str
+    id: UUID
     nombre: str
     email: Optional[str] = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
 
 
 class ClienteSimple(BaseModel):
-    id: str
+    id: UUID
     nombre: str
     cuit: Optional[str] = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
 
 
 class FacturaResponse(BaseModel):
-    id: str
+    id: UUID
     nombre_archivo: str
     numero_factura: Optional[str] = None
     fecha_factura: Optional[datetime] = None
@@ -39,7 +39,7 @@ class FacturaResponse(BaseModel):
     proveedor: Optional[ProveedorSimple] = None
     clientes: List[ClienteSimple] = []
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
 
 
 class FacturaConfirmar(BaseModel):

@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -9,9 +10,9 @@ class ContactoCCCreate(BaseModel):
 
 
 class ContactoCCResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_encoders={UUID: str})
 
-    id: str
+    id: UUID
     nombre: str
     email: str
     created_at: datetime
