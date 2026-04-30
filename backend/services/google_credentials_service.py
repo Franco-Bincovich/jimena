@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
+from utils.google_credentials_patch import PatchedCredentials as Credentials
 from google_auth_oauthlib.flow import Flow
 
 from repositories import google_config_repo
