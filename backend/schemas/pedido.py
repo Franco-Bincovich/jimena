@@ -17,7 +17,7 @@ class PedidoRequest(BaseModel):
     anio: int
     fecha_desde: date
     fecha_hasta: date
-    items: list[PedidoItemInput]
+    clientes: list[PedidoItemInput]
 
 
 class _ProveedorOut(BaseModel):
