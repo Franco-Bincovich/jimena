@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from sqlalchemy.orm import Session
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -72,13 +74,17 @@ def get_credentials(db: Session) -> Credentials:
 
     from config.settings import settings  # lazy — solo se necesita cuando hay refresh_token
 
+    expiry = config.token_expiry
+    if expiry is not None and expiry.tzinfo is None:
+        expiry = expiry.replace(tzinfo=timezone.utc)
+
     credentials = Credentials(
         token=config.access_token,
         refresh_token=config.refresh_token,
         token_uri=_TOKEN_URI,
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
-        expiry=config.token_expiry,
+        expiry=expiry,
         scopes=SCOPES,
     )
 
