@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from google.auth.transport.requests import Request
@@ -88,7 +88,14 @@ def get_credentials(db: Session) -> Credentials:
         scopes=SCOPES,
     )
 
-    if not credentials.valid:
+    now = datetime.now(timezone.utc)
+    expiry_aware = (
+        credentials.expiry.replace(tzinfo=timezone.utc)
+        if credentials.expiry is not None and credentials.expiry.tzinfo is None
+        else credentials.expiry
+    )
+    token_expired = expiry_aware is None or expiry_aware <= now
+    if not credentials.token or token_expired:
         credentials.refresh(Request())
         google_config_repo.upsert(db, {
             "access_token": credentials.token,
