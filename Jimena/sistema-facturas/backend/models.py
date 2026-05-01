@@ -16,6 +16,7 @@ class User(Base):
 
     id = Column(String(36), primary_key=True, default=_uuid)
     email = Column(String(200), nullable=False, unique=True, index=True)
+    username = Column(String(100), nullable=True, unique=True, index=True)
     password_hash = Column(Text, nullable=False)
     nombre = Column(String(200), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
