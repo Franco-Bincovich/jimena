@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && getToken()) {
       clearSession()
       window.location.href = '/login'
     }
