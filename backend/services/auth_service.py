@@ -15,7 +15,7 @@ def login(db: Session, email: str, password: str) -> dict:
     if not bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
         raise AppError("Credenciales inválidas", "INVALID_CREDENTIALS", 401)
 
-    token = create_access_token(user.id, user.nombre)
+    token = create_access_token(str(user.id), user.nombre)
     return {
         "access_token": token,
         "token_type": "bearer",
