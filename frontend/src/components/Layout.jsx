@@ -1,8 +1,10 @@
 import { useLocation } from 'react-router-dom'
-import { CONFIG_ITEM, NAV_SECTIONS, NavItem } from './SideNav'
+import { useAuth } from '../hooks/useAuth'
+import { CAMBIAR_PASSWORD_ITEM, CONFIG_ITEM, NAV_SECTIONS, NavItem } from './SideNav'
 
 export default function Layout({ children }) {
   const location = useLocation()
+  const { logout, user } = useAuth()
 
   return (
     <div className="flex min-h-screen">
@@ -43,6 +45,31 @@ export default function Layout({ children }) {
         <div className="px-2 py-3" style={{ borderTop: '0.5px solid #1A1A1A' }}>
           <p className="text-muted-dark px-3 mb-1 uppercase tracking-wider" style={{ fontSize: '10px' }}>Sistema</p>
           <NavItem item={CONFIG_ITEM} active={location.pathname === CONFIG_ITEM.path} />
+          <NavItem item={CAMBIAR_PASSWORD_ITEM} active={location.pathname === CAMBIAR_PASSWORD_ITEM.path} />
+        </div>
+
+        {/* Usuario + logout */}
+        <div className="px-4 py-3 flex items-center gap-2" style={{ borderTop: '0.5px solid #1A1A1A' }}>
+          <div className="flex-1 min-w-0">
+            <p className="text-text truncate" style={{ fontSize: '12px', fontWeight: '500' }}>
+              {user?.nombre || '—'}
+            </p>
+            <p className="text-muted-dark truncate" style={{ fontSize: '10px' }}>
+              {user?.email || ''}
+            </p>
+          </div>
+          <button
+            onClick={logout}
+            title="Cerrar sesión"
+            style={{ color: '#555', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+            className="hover:text-muted transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+              <path d="M9 4.5l2.5 2.5L9 9.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M11.5 7H5.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
       </aside>
 
