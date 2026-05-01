@@ -7,13 +7,14 @@ from sqlalchemy.orm import Session
 from config.settings import settings
 from database import get_db
 from services import google_auth_service
+from utils.auth import get_current_user
 from utils.logger import logger
 
 router = APIRouter(prefix="/auth/google", tags=["google-auth"])
 
 
 @router.get("/url")
-async def get_auth_url(db: Session = Depends(get_db)):
+async def get_auth_url(db: Session = Depends(get_db), _=Depends(get_current_user)):
     url = google_auth_service.get_authorization_url(db)
     return {"url": url}
 
@@ -29,11 +30,11 @@ async def google_callback(code: str, state: str, db: Session = Depends(get_db)):
 
 
 @router.get("/status")
-async def google_status(db: Session = Depends(get_db)):
+async def google_status(db: Session = Depends(get_db), _=Depends(get_current_user)):
     return google_auth_service.get_status(db)
 
 
 @router.post("/disconnect")
-async def google_disconnect(db: Session = Depends(get_db)):
+async def google_disconnect(db: Session = Depends(get_db), _=Depends(get_current_user)):
     google_auth_service.disconnect(db)
     return {"ok": True}

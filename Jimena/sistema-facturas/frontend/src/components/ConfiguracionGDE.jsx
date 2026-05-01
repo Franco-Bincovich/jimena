@@ -68,7 +68,7 @@ export function DriveSection({ driveFolderId, setDriveFolderId, driveVerifyStatu
       </div>
       <div className="rounded-md p-3" style={{ backgroundColor: '#111', border: '0.5px solid #1A1A1A' }}>
         <p className="text-muted-dark text-[11px] uppercase tracking-wider mb-2">Estructura de carpetas que se va a crear</p>
-        <pre className="text-[12px] m-0 font-mono leading-6" style={{ color: '#555' }}>{`📁 Facturas/\n   📁 Proveedores/\n      📁 {nombre del proveedor}/\n   📁 Clientes/\n      📁 {nombre del cliente}/`}</pre>
+        <pre className="text-[12px] m-0 font-mono leading-6" style={{ color: '#555' }}>{`📁 Facturas/\n   📁 {nombre del proveedor}/`}</pre>
       </div>
     </div>
   )

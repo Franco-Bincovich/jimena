@@ -18,7 +18,7 @@ async def preview_pedido(data: PedidoRequest, db: Session = Depends(get_db)):
         anio=data.anio,
         fecha_desde=data.fecha_desde,
         fecha_hasta=data.fecha_hasta,
-        items=data.items,
+        items=data.clientes,
         db=db,
     )
 
@@ -33,7 +33,7 @@ async def enviar_pedido(data: PedidoEnviarRequest, db: Session = Depends(get_db)
         anio=data.anio,
         fecha_desde=data.fecha_desde,
         fecha_hasta=data.fecha_hasta,
-        items=data.items,
+        items=data.clientes,
         asunto_override=data.asunto_override,
         cuerpo_override=data.cuerpo_override,
         cc=data.cc,

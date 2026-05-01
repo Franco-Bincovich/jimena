@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -9,6 +9,17 @@ from database import Base
 
 def _uuid() -> str:
     return str(uuid.uuid4())
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True, default=_uuid)
+    email = Column(String(200), nullable=False, unique=True, index=True)
+    password_hash = Column(Text, nullable=False)
+    nombre = Column(String(200), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class Proveedor(Base):
@@ -141,7 +152,7 @@ class GoogleConfig(Base):
     id = Column(Integer, primary_key=True)
     access_token = Column(Text, nullable=True)
     refresh_token = Column(Text, nullable=True)
-    token_expiry = Column(DateTime, nullable=True)
+    token_expiry = Column(DateTime(timezone=True), nullable=True)
     sheet_id = Column(String(200), nullable=True)
     drive_folder_id = Column(String(200), nullable=True)
     empresa_nombre = Column(String(200), nullable=True)

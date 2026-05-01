@@ -98,6 +98,18 @@ export const CONFIG_ITEM = {
   ),
 }
 
+export const CAMBIAR_PASSWORD_ITEM = {
+  path: '/cambiar-password',
+  label: 'Cambiar contraseña',
+  icon: (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <rect x="2" y="5.5" width="9" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.1" />
+      <path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+      <circle cx="6.5" cy="8.5" r="1" fill="currentColor" />
+    </svg>
+  ),
+}
+
 export function NavItem({ item, active }) {
   const navigate = useNavigate()
   return (

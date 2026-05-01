@@ -54,8 +54,7 @@ def get_flow() -> Flow:
 
 def get_credentials(db: Session) -> Credentials:
     """
-    Lee los tokens de GoogleConfig y devuelve Credentials válidas.
-    Refresca el access_token automáticamente si expiró.
+    Lee los tokens de GoogleConfig, refresca el access_token y devuelve Credentials listas.
 
     Args:
         db: Sesión de base de datos.
@@ -78,15 +77,14 @@ def get_credentials(db: Session) -> Credentials:
         token_uri=_TOKEN_URI,
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
-        expiry=config.token_expiry,
         scopes=SCOPES,
     )
 
-    if not credentials.valid:
-        credentials.refresh(Request())
-        google_config_repo.upsert(db, {
-            "access_token": credentials.token,
-            "token_expiry": credentials.expiry,
-        })
+    credentials.refresh(Request())
+    google_config_repo.upsert(db, {
+        "access_token": credentials.token,
+        "refresh_token": credentials.refresh_token,
+        "token_expiry": credentials.expiry,
+    })
 
     return credentials

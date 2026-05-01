@@ -125,7 +125,6 @@ async def test_enviar_factura(client, factura_confirmada, cliente_base, plantill
     with (
         patch("routers.envios.get_credentials", return_value=MagicMock()),
         patch("services.gmail_sender_service.enviar_email", return_value="msg_id_456") as mock_gmail,
-        patch("services.drive_service.copiar_factura_cliente", return_value={"file_id": "f1", "url": "https://drive.test"}),
         patch("services.sheets_writer_service.registrar_envio", return_value=None),
     ):
         resp = await client.post("/api/envios/enviar", json=payload)

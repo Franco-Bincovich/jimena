@@ -35,7 +35,7 @@ export function usePedirFactura() {
     anio: Number(anio),
     fecha_desde: fechaDesde || today,
     fecha_hasta: fechaHasta || today,
-    items: clientesValidos.map((ci) => ({
+    clientes: clientesValidos.map((ci) => ({
       cliente_id: ci.cliente_id,
       consultas_api: ci.consultas_api ? Number(ci.consultas_api) : undefined,
     })),

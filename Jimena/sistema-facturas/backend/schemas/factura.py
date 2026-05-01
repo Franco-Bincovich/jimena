@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ProveedorSimple(BaseModel):
@@ -12,6 +12,11 @@ class ProveedorSimple(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
+
 
 class ClienteSimple(BaseModel):
     id: str
@@ -19,6 +24,11 @@ class ClienteSimple(BaseModel):
     cuit: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
 
 
 class FacturaResponse(BaseModel):
@@ -40,6 +50,11 @@ class FacturaResponse(BaseModel):
     clientes: List[ClienteSimple] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
 
 
 class FacturaConfirmar(BaseModel):

@@ -44,3 +44,8 @@ class ClienteResponse(BaseModel):
     telefono: Optional[str]
     notas: Optional[str]
     created_at: datetime
+
+    @field_validator('id', mode='before')
+    @classmethod
+    def convert_uuid(cls, v):
+        return str(v) if v is not None else v
