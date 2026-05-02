@@ -6,9 +6,9 @@ from utils.auth import create_access_token
 from utils.errors import AppError
 
 
-def login(db: Session, email: str, password: str) -> dict:
+def login(db: Session, username: str, password: str) -> dict:
     """Verifica credenciales y devuelve token JWT."""
-    user = user_repo.get_by_email(db, email)
+    user = user_repo.get_by_username(db, username)
     if not user or not user.is_active:
         raise AppError("Credenciales inválidas", "INVALID_CREDENTIALS", 401)
 
