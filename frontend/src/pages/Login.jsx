@@ -25,14 +25,25 @@ export default function Login() {
     }
   }
 
+  const inputStyle = {
+    backgroundColor: 'var(--c-input-bg)',
+    border: '0.5px solid var(--c-input-border)',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    fontSize: '13px',
+    color: 'var(--c-text)',
+    outline: 'none',
+    width: '100%',
+  }
+
   return (
     <div
       className="flex items-center justify-center min-h-screen"
-      style={{ backgroundColor: '#111111' }}
+      style={{ backgroundColor: 'var(--c-bg)' }}
     >
       <div
         className="w-full max-w-sm rounded-lg p-8"
-        style={{ backgroundColor: '#0A0A0A', border: '0.5px solid #1A1A1A' }}
+        style={{ backgroundColor: 'var(--c-sidebar)', border: '0.5px solid var(--c-border-s)' }}
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
@@ -44,54 +55,36 @@ export default function Login() {
               <path d="M1.5 2h8v7l-1.5-1L6.5 9 5 8 3.5 9 2 8l-.5.5V2z" fill="white" />
             </svg>
           </div>
-          <span className="font-semibold text-white" style={{ fontSize: '15px' }}>Facturas</span>
-          <span style={{ fontSize: '11px', color: '#555' }}>Sistema interno</span>
+          <span className="font-semibold text-text" style={{ fontSize: '15px' }}>Facturas</span>
+          <span className="text-muted-dark" style={{ fontSize: '11px' }}>Sistema interno</span>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: '12px', color: '#888' }}>Usuario</label>
+            <label className="text-muted" style={{ fontSize: '12px' }}>Usuario</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               autoFocus
-              style={{
-                backgroundColor: '#111111',
-                border: '0.5px solid #2A2A2A',
-                borderRadius: '6px',
-                padding: '8px 12px',
-                fontSize: '13px',
-                color: '#E5E5E5',
-                outline: 'none',
-                width: '100%',
-              }}
+              style={inputStyle}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: '12px', color: '#888' }}>Contraseña</label>
+            <label className="text-muted" style={{ fontSize: '12px' }}>Contraseña</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{
-                backgroundColor: '#111111',
-                border: '0.5px solid #2A2A2A',
-                borderRadius: '6px',
-                padding: '8px 12px',
-                fontSize: '13px',
-                color: '#E5E5E5',
-                outline: 'none',
-                width: '100%',
-              }}
+              style={inputStyle}
             />
           </div>
 
           {error && (
-            <p style={{ fontSize: '12px', color: '#FF4D4D' }}>{error}</p>
+            <p style={{ fontSize: '12px', color: 'var(--c-error)' }}>{error}</p>
           )}
 
           <button

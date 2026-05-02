@@ -30,7 +30,7 @@ export const fromInputDate = (v) => {
 
 export function PendienteBadge() {
   return (
-    <span className="px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap" style={{ backgroundColor: '#1E1800', color: '#D4920A', border: '0.5px solid #3A3000' }}>
+    <span className="px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap" style={{ backgroundColor: 'var(--c-warn-bg)', color: 'var(--c-warn-text)', border: '0.5px solid var(--c-warn-border)' }}>
       Pendiente de confirmar
     </span>
   )
@@ -39,7 +39,7 @@ export function PendienteBadge() {
 export function EstadoBadge({ estado, driveUrl }) {
   if (estado === 'confirmada') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: '#0A2A0A', color: '#5CB85C', border: '0.5px solid #1A4A1A' }}>
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: 'var(--c-ok-bg)', color: 'var(--c-ok-text)', border: '0.5px solid var(--c-ok-border)' }}>
         Confirmada
         {driveUrl && (
           <a href={driveUrl} target="_blank" rel="noopener noreferrer" className="underline opacity-80 hover:opacity-100" title="Ver en Drive">↗</a>
@@ -56,7 +56,7 @@ export function Spinner() {
 
 export function CardSkeleton() {
   return Array.from({ length: 2 }).map((_, i) => (
-    <div key={i} className="bg-surface rounded-lg p-4 animate-pulse" style={{ border: '0.5px solid #222' }}>
+    <div key={i} className="bg-surface rounded-lg p-4 animate-pulse" style={{ border: '0.5px solid var(--c-border)' }}>
       <div className="h-3.5 bg-surface-hover rounded w-52 mb-3" />
       <div className="grid grid-cols-2 gap-2">
         {[1, 2, 3, 4].map((j) => <div key={j} className="h-3 bg-surface-hover rounded" />)}
@@ -67,7 +67,7 @@ export function CardSkeleton() {
 
 export function TableSkeleton() {
   return Array.from({ length: 3 }).map((_, i) => (
-    <tr key={i} style={{ borderTop: '0.5px solid #222' }}>
+    <tr key={i} style={{ borderTop: '0.5px solid var(--c-border)' }}>
       {[52, 30, 22, 18, 20, 18, 14].map((w, j) => (
         <td key={j} className="px-3 py-3">
           <div className="h-3 rounded animate-pulse bg-surface-hover" style={{ width: `${w}%` }} />
@@ -79,11 +79,11 @@ export function TableSkeleton() {
 
 export function GmailBuscarSection({ googleConnected, searching, handleBuscar }) {
   return (
-    <div className="p-4 bg-surface rounded-lg mb-6" style={{ border: '0.5px solid #222' }}>
+    <div className="p-4 bg-surface rounded-lg mb-6" style={{ border: '0.5px solid var(--c-border)' }}>
       <p className="text-text text-[13px] font-medium mb-1">Buscar facturas nuevas</p>
       <p className="text-muted text-[12px] mb-4">Escanea la bandeja de Gmail y detecta emails con facturas adjuntas como PDF.</p>
       {googleConnected === false ? (
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-md text-[12.5px]" style={{ backgroundColor: '#1E1800', border: '0.5px solid #3A3000', color: '#D4920A' }}>
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-md text-[12.5px]" style={{ backgroundColor: 'var(--c-warn-bg)', border: '0.5px solid var(--c-warn-border)', color: 'var(--c-warn-text)' }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.1" />
             <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -107,11 +107,11 @@ export function GmailBuscarSection({ googleConnected, searching, handleBuscar })
 
 export function FacturasTodasTab({ loading, todas, setDeleteModal }) {
   return (
-    <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid #222' }}>
+    <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid var(--c-border)' }}>
       <div style={{ overflowX: 'auto' }}>
       <table className="w-full">
         <thead>
-          <tr style={{ borderBottom: '0.5px solid #222' }}>
+          <tr style={{ borderBottom: '0.5px solid var(--c-border)' }}>
             {['Archivo', 'Proveedor', 'N° Factura', 'Fecha', 'Monto', 'Estado', 'Acciones'].map((col) => (
               <th key={col} className="px-3 py-3 text-left text-muted-dark text-[11.5px] font-medium uppercase tracking-wider whitespace-nowrap">{col}</th>
             ))}
@@ -121,7 +121,7 @@ export function FacturasTodasTab({ loading, todas, setDeleteModal }) {
           {loading ? <TableSkeleton /> : todas.length === 0 ? (
             <tr><td colSpan={7} className="px-4 py-12 text-center text-muted text-[12.5px]">No hay facturas cargadas todavía</td></tr>
           ) : todas.map((f) => (
-            <tr key={f.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid #222' }}>
+            <tr key={f.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid var(--c-border)' }}>
               <td className="px-3 py-3"><code className="text-primary text-[11.5px]">{f.nombre_archivo}</code></td>
               <td className="px-3 py-3 text-muted text-[12px]">{f.proveedor?.nombre || '—'}</td>
               <td className="px-3 py-3 text-muted text-[12px] font-mono">{f.numero_factura || '—'}</td>

@@ -47,7 +47,7 @@ export default function FacturaConfirmModal({ open, saving, confirmForm, setFiel
 
         <div>
           <label className="block text-[12.5px] text-text mb-1.5">Clientes asociados <span className="text-error">*</span></label>
-          <div className="rounded-md p-3 max-h-40 overflow-y-auto" style={{ backgroundColor: '#141414', border: '0.5px solid #2A2A2A' }}>
+          <div className="rounded-md p-3 max-h-40 overflow-y-auto" style={{ backgroundColor: 'var(--c-bg)', border: '0.5px solid var(--c-border-l)' }}>
             {clientes.length === 0 ? (
               <p className="text-muted text-[12px]">No hay clientes cargados todavía</p>
             ) : clientes.map((c) => (

@@ -2,9 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --c-bg: #111111;
+  --c-sidebar: #0A0A0A;
+  --c-surface: #171717;
+  --c-surface-hover: #1E1E1E;
+  --c-border: #222222;
+  --c-border-s: #1A1A1A;
+  --c-border-l: #2A2A2A;
+  --c-text: #F0F0F0;
+  --c-muted: #888888;
+  --c-muted-d: #555555;
+  --c-input-bg: #1F1F1F;
+  --c-input-border: #2A2A2A;
+  --c-warn-bg: #1E1800;
+  --c-warn-text: #D4920A;
+  --c-warn-border: #3A3000;
+  --c-ok-bg: #0A2A0A;
+  --c-ok-text: #5CB85C;
+  --c-ok-border: #1A4A1A;
+  --c-success: #5CB85C;
+  --c-success-bg: #0A2A0A;
+  --c-error: #E07070;
+  --c-error-bg: #2A0F0F;
+}
+
+[data-theme="light"] {
+  --c-bg: #F5F5F5;
+  --c-sidebar: #FFFFFF;
+  --c-surface: #FFFFFF;
+  --c-surface-hover: #F0F0F0;
+  --c-border: #E0E0E0;
+  --c-border-s: #E0E0E0;
+  --c-border-l: #D0D0D0;
+  --c-text: #111111;
+  --c-muted: #555555;
+  --c-muted-d: #767676;
+  --c-input-bg: #FFFFFF;
+  --c-input-border: #D0D0D0;
+  --c-warn-bg: #FFF8E1;
+  --c-warn-text: #7C4F00;
+  --c-warn-border: #FFE082;
+  --c-ok-bg: #E8F5E9;
+  --c-ok-text: #2E7D32;
+  --c-ok-border: #C8E6C9;
+  --c-success: #2E7D32;
+  --c-success-bg: #E8F5E9;
+  --c-error: #C62828;
+  --c-error-bg: #FFEBEE;
+}
+
 body {
-  background-color: #111111;
-  color: #F0F0F0;
+  background-color: var(--c-bg);
+  color: var(--c-text);
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
@@ -20,9 +70,9 @@ body {
 select,
 input,
 textarea {
-  background-color: #1F1F1F;
-  border: 0.5px solid #2A2A2A;
-  color: #E8E8E8;
+  background-color: var(--c-input-bg);
+  border: 0.5px solid var(--c-input-border);
+  color: var(--c-text);
   border-radius: 6px;
   padding: 8px 11px;
   font-size: 13px;
@@ -39,7 +89,8 @@ textarea:focus {
 }
 
 select option {
-  background-color: #1F1F1F;
+  background-color: var(--c-input-bg);
+  color: var(--c-text);
 }
 
 * {

@@ -48,11 +48,11 @@ export default function Historial() {
         </div>
       </div>
 
-      <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid #222' }}>
+      <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid var(--c-border)' }}>
         <div style={{ overflowX: 'auto' }}>
         <table className="w-full">
           <thead>
-            <tr style={{ borderBottom: '0.5px solid #222' }}>
+            <tr style={{ borderBottom: '0.5px solid var(--c-border)' }}>
               {COLS.map((col) => (
                 <th key={col} className="px-4 py-3 text-left text-muted-dark text-[11.5px] font-medium uppercase tracking-wider">{col}</th>
               ))}
@@ -69,7 +69,7 @@ export default function Historial() {
               </tr>
             ) : (
               filtered.map((h) => (
-                <tr key={h.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid #222' }}>
+                <tr key={h.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid var(--c-border)' }}>
                   <td className="px-4 py-3 text-muted text-[12px] whitespace-nowrap">{formatDate(h.created_at)}</td>
                   <td className="px-4 py-3"><TipoBadge tipo={h.tipo} /></td>
                   <td className="px-4 py-3">

@@ -33,7 +33,7 @@ export default function PedirFactura() {
       {googleConnected === false && <GoogleWarning />}
 
       <div className="flex flex-col gap-4">
-        <div className="p-5 rounded-lg" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+        <div className="p-5 rounded-lg" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
           <SectionLabel n="1">Seleccionar destinatario y plantilla</SectionLabel>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Proveedor" required>
@@ -61,20 +61,20 @@ export default function PedirFactura() {
           clientesValidos={clientesValidos}
         />
 
-        <div className="p-5 rounded-lg" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+        <div className="p-5 rounded-lg" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
           <div className="flex items-start justify-between gap-4 mb-4">
             <SectionLabel n="3">Contenido del email</SectionLabel>
             <div className="flex flex-wrap gap-1 justify-end" style={{ maxWidth: '55%' }}>
               {VARS_PEDIDO.map((v) => (
-                <span key={v} className="px-1.5 py-0.5 rounded text-[11px] font-mono" style={{ backgroundColor: '#1A1A1A', color: '#555', border: '0.5px solid #2A2A2A' }}>
+                <span key={v} className="px-1.5 py-0.5 rounded text-[11px] font-mono" style={{ backgroundColor: 'var(--c-border-s)', color: 'var(--c-muted-d)', border: '0.5px solid var(--c-border-l)' }}>
                   {`{{${v}}}`}
                 </span>
               ))}
             </div>
           </div>
           {previewLoading && (
-            <div className="flex items-center gap-2 text-[12px] mb-3" style={{ color: '#888' }}>
-              <div className="w-3 h-3 rounded-full border animate-spin flex-shrink-0" style={{ borderColor: '#333', borderTopColor: '#888' }} />
+            <div className="flex items-center gap-2 text-[12px] mb-3" style={{ color: 'var(--c-muted)' }}>
+              <div className="w-3 h-3 rounded-full border animate-spin flex-shrink-0" style={{ borderColor: 'var(--c-border-l)', borderTopColor: 'var(--c-muted)' }} />
               Generando preview…
             </div>
           )}
@@ -94,7 +94,7 @@ export default function PedirFactura() {
       </div>
 
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-5">
-        <button type="button" onClick={() => setPreviewOpen(true)} disabled={!asunto && !cuerpo} className="px-4 py-2 text-muted hover:text-text text-[12.5px] rounded-md transition-colors min-h-[44px] disabled:opacity-40" style={{ border: '0.5px solid #2A2A2A' }}>
+        <button type="button" onClick={() => setPreviewOpen(true)} disabled={!asunto && !cuerpo} className="px-4 py-2 text-muted hover:text-text text-[12.5px] rounded-md transition-colors min-h-[44px] disabled:opacity-40" style={{ border: '0.5px solid var(--c-border-l)' }}>
           Vista previa
         </button>
         <button type="button" onClick={handleEnviar} disabled={sending || googleConnected === false || googleConnected === null} className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-[12.5px] font-medium rounded-md transition-colors min-h-[44px]">

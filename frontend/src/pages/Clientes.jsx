@@ -9,7 +9,7 @@ const COLS = ['Nombre', 'CUIT', 'Email', 'Teléfono', 'Acciones']
 
 function Skeleton() {
   return Array.from({ length: 3 }).map((_, i) => (
-    <tr key={i} style={{ borderTop: '0.5px solid #222' }}>
+    <tr key={i} style={{ borderTop: '0.5px solid var(--c-border)' }}>
       {COLS.map((c, j) => (
         <td key={c} className="px-4 py-3">
           <div className="h-3 rounded animate-pulse bg-surface-hover" style={{ width: j === 4 ? '80px' : '60%' }} />
@@ -90,11 +90,11 @@ export default function Clientes() {
         </button>
       </div>
 
-      <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid #222' }}>
+      <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid var(--c-border)' }}>
         <div style={{ overflowX: 'auto' }}>
         <table className="w-full">
           <thead>
-            <tr style={{ borderBottom: '0.5px solid #222' }}>
+            <tr style={{ borderBottom: '0.5px solid var(--c-border)' }}>
               {COLS.map((col) => (
                 <th key={col} className="px-4 py-3 text-left text-muted-dark text-[11.5px] font-medium uppercase tracking-wider">{col}</th>
               ))}
@@ -109,7 +109,7 @@ export default function Clientes() {
                 </td>
               </tr>
             ) : items.map((c) => (
-              <tr key={c.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid #222' }}>
+              <tr key={c.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid var(--c-border)' }}>
                 <td className="px-4 py-3 text-text text-[12.5px]">{c.nombre}</td>
                 <td className="px-4 py-3 text-muted text-[12.5px] font-mono">{c.cuit || '—'}</td>
                 <td className="px-4 py-3 text-muted text-[12.5px]">{c.email || '—'}</td>

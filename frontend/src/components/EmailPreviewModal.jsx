@@ -7,7 +7,7 @@ export default function EmailPreviewModal({ open, onClose, asunto, cuerpo, desti
         {/* Cabecera del email */}
         <div
           className="rounded-md p-3 flex flex-col gap-1.5"
-          style={{ backgroundColor: '#141414', border: '0.5px solid #2A2A2A' }}
+          style={{ backgroundColor: 'var(--c-bg)', border: '0.5px solid var(--c-border-l)' }}
         >
           <div className="flex gap-2 text-[12px]">
             <span className="text-muted-dark w-14 flex-shrink-0">Para:</span>
@@ -19,7 +19,7 @@ export default function EmailPreviewModal({ open, onClose, asunto, cuerpo, desti
               <span className="text-muted">{destinatario.nombre}</span>
             </div>
           )}
-          <div className="flex gap-2 text-[12px]" style={{ borderTop: '0.5px solid #222', paddingTop: '6px', marginTop: '2px' }}>
+          <div className="flex gap-2 text-[12px]" style={{ borderTop: '0.5px solid var(--c-border)', paddingTop: '6px', marginTop: '2px' }}>
             <span className="text-muted-dark w-14 flex-shrink-0">Asunto:</span>
             <span className="text-text font-medium">{asunto || '—'}</span>
           </div>
@@ -28,11 +28,11 @@ export default function EmailPreviewModal({ open, onClose, asunto, cuerpo, desti
         {/* Cuerpo */}
         <div
           className="rounded-md p-4"
-          style={{ backgroundColor: '#1A1A1A', border: '0.5px solid #222' }}
+          style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}
         >
           <pre
-            className="text-[13px] leading-7 m-0 font-sans"
-            style={{ whiteSpace: 'pre-wrap', color: '#E8E8E8', lineHeight: '1.7' }}
+            className="text-[13px] leading-7 m-0 font-sans text-text"
+            style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7' }}
           >
             {cuerpo || '(sin contenido)'}
           </pre>
@@ -44,7 +44,7 @@ export default function EmailPreviewModal({ open, onClose, asunto, cuerpo, desti
             <span className="text-muted-dark text-[11.5px]">Adjunto:</span>
             <span
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11.5px] font-mono"
-              style={{ backgroundColor: '#0A2A0A', color: '#5CB85C', border: '0.5px solid #1A4A1A' }}
+              style={{ backgroundColor: 'var(--c-ok-bg)', color: 'var(--c-ok-text)', border: '0.5px solid var(--c-ok-border)' }}
             >
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
                 <path d="M2 9.5L8.5 3a2 2 0 00-2.83-2.83L1.17 5.17a3 3 0 004.24 4.24L9 5.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />

@@ -37,7 +37,7 @@ export default function SelectorCC({ value, onChange }) {
       {contactos.length > 0 && (
         <div
           className="rounded-md p-3"
-          style={{ backgroundColor: '#141414', border: '0.5px solid #2A2A2A' }}
+          style={{ backgroundColor: 'var(--c-bg)', border: '0.5px solid var(--c-border-l)' }}
         >
           {contactos.map((c) => (
             <label
@@ -64,7 +64,7 @@ export default function SelectorCC({ value, onChange }) {
             <span
               key={email}
               className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[12px]"
-              style={{ backgroundColor: '#1E1E1E', border: '0.5px solid #2A2A2A', color: '#888' }}
+              style={{ backgroundColor: 'var(--c-surface-hover)', border: '0.5px solid var(--c-border-l)', color: 'var(--c-muted)' }}
             >
               {email}
               <button
@@ -97,7 +97,7 @@ export default function SelectorCC({ value, onChange }) {
           onClick={addEmailExtra}
           disabled={!emailExtra.trim()}
           className="px-3 py-1.5 text-muted hover:text-text text-[12px] rounded-md transition-colors disabled:opacity-40 flex-shrink-0"
-          style={{ border: '0.5px solid #2A2A2A' }}
+          style={{ border: '0.5px solid var(--c-border-l)' }}
         >
           + Agregar
         </button>

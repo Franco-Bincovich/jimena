@@ -52,8 +52,8 @@ export function IconUsers() {
 export function IconCheck() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <circle cx="7" cy="7" r="5.5" fill="#0A2A0A" stroke="#1A4A1A" strokeWidth="1" />
-      <path d="M4.5 7l1.8 1.8L9.5 5.5" stroke="#5CB85C" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="7" cy="7" r="5.5" fill="var(--c-ok-bg)" stroke="var(--c-ok-border)" strokeWidth="1" />
+      <path d="M4.5 7l1.8 1.8L9.5 5.5" stroke="var(--c-ok-text)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -61,15 +61,15 @@ export function IconCheck() {
 export function IconWarn() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <circle cx="7" cy="7" r="5.5" fill="#1E1800" stroke="#3A3000" strokeWidth="1" />
-      <path d="M7 4.5v3M7 9.5v.5" stroke="#D4920A" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="7" cy="7" r="5.5" fill="var(--c-warn-bg)" stroke="var(--c-warn-border)" strokeWidth="1" />
+      <path d="M7 4.5v3M7 9.5v.5" stroke="var(--c-warn-text)" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   )
 }
 
 export function CardHeader({ icon, title }) {
   return (
-    <div className="flex items-center gap-2.5 mb-5" style={{ borderBottom: '0.5px solid #222', paddingBottom: '14px' }}>
+    <div className="flex items-center gap-2.5 mb-5" style={{ borderBottom: '0.5px solid var(--c-border)', paddingBottom: '14px' }}>
       {icon}
       <h2 className="text-text text-[13.5px] font-medium">{title}</h2>
     </div>
@@ -78,7 +78,7 @@ export function CardHeader({ icon, title }) {
 
 export function InstruccionBox({ children }) {
   return (
-    <div className="rounded-md p-3 mb-4 text-[12.5px] leading-relaxed" style={{ backgroundColor: '#1A1A1A', borderLeft: '2px solid #FF6B00', color: '#888' }}>
+    <div className="rounded-md p-3 mb-4 text-[12.5px] leading-relaxed" style={{ backgroundColor: 'var(--c-border-s)', borderLeft: '2px solid #FF6B00', color: 'var(--c-muted)' }}>
       {children}
     </div>
   )
@@ -86,20 +86,20 @@ export function InstruccionBox({ children }) {
 
 export function VerifyBadge({ status }) {
   if (status === 'ok') return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[12px]" style={{ backgroundColor: '#0A2A0A', color: '#5CB85C', border: '0.5px solid #1A4A1A' }}>
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[12px]" style={{ backgroundColor: 'var(--c-ok-bg)', color: 'var(--c-ok-text)', border: '0.5px solid var(--c-ok-border)' }}>
       <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
       Verificado
     </span>
   )
   if (status === 'error') return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[12px]" style={{ backgroundColor: '#2A0F0F', color: '#E07070', border: '0.5px solid #4A1E1E' }}>Sin acceso</span>
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[12px]" style={{ backgroundColor: 'var(--c-error-bg)', color: 'var(--c-error)', border: '0.5px solid var(--c-border-l)' }}>Sin acceso</span>
   )
   return null
 }
 
 export function Spinner({ white }) {
   return (
-    <div className="w-3.5 h-3.5 rounded-full border-2 animate-spin flex-shrink-0" style={white ? { borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' } : { borderColor: '#333', borderTopColor: '#888' }} />
+    <div className="w-3.5 h-3.5 rounded-full border-2 animate-spin flex-shrink-0" style={white ? { borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' } : { borderColor: 'var(--c-border-l)', borderTopColor: 'var(--c-muted)' }} />
   )
 }
 

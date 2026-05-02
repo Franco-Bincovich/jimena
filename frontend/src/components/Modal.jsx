@@ -26,12 +26,12 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
     >
       <div
         className={`relative w-full ${SIZES[size]} mx-4 bg-surface rounded-lg`}
-        style={{ border: '0.5px solid #222' }}
+        style={{ border: '0.5px solid var(--c-border)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '0.5px solid #222' }}
+          style={{ borderBottom: '0.5px solid var(--c-border)' }}
         >
           <span className="text-[13px] font-medium text-text">{title}</span>
           <button

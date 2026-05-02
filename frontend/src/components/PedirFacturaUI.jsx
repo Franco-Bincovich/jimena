@@ -12,7 +12,7 @@ export function PedirSkeletonLoader() {
   return (
     <div className="flex flex-col gap-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-lg p-5 animate-pulse" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+        <div key={i} className="rounded-lg p-5 animate-pulse" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
           <div className="h-2.5 bg-surface-hover rounded w-48 mb-4" />
           <div className="grid grid-cols-2 gap-4">
             <div className="h-8 bg-surface-hover rounded" />
@@ -29,7 +29,7 @@ export function PeriodoClientesSection({
   clienteItems, clientes, clientesUsados, setClienteField, addCliente, removeCliente, clientesValidos,
 }) {
   return (
-    <div className="p-5 rounded-lg" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+    <div className="p-5 rounded-lg" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
       <SectionLabel n="2">Período y clientes</SectionLabel>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         <FormField label="Mes" required>
@@ -50,7 +50,7 @@ export function PeriodoClientesSection({
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-text text-[12.5px] font-medium">Clientes incluidos en el pedido</p>
-          <button type="button" onClick={addCliente} className="flex items-center gap-1 px-2.5 py-1.5 text-muted hover:text-text text-[12px] rounded transition-colors" style={{ border: '0.5px solid #2A2A2A' }}>
+          <button type="button" onClick={addCliente} className="flex items-center gap-1 px-2.5 py-1.5 text-muted hover:text-text text-[12px] rounded transition-colors" style={{ border: '0.5px solid var(--c-border-l)' }}>
             + Agregar cliente
           </button>
         </div>
@@ -78,7 +78,7 @@ export function PeriodoClientesSection({
           })}
         </div>
         {clientesValidos.length === 0 && (
-          <p className="text-[11.5px] mt-2" style={{ color: '#D4920A' }}>Necesitás al menos un cliente para poder enviar el pedido.</p>
+          <p className="text-[11.5px] mt-2" style={{ color: 'var(--c-warn-text)' }}>Necesitás al menos un cliente para poder enviar el pedido.</p>
         )}
       </div>
     </div>

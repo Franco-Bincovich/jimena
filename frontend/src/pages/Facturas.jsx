@@ -22,7 +22,7 @@ export default function Facturas() {
       <GmailBuscarSection googleConnected={googleConnected} searching={searching} handleBuscar={handleBuscar} />
 
       <div>
-        <div className="flex" style={{ borderBottom: '0.5px solid #222' }}>
+        <div className="flex" style={{ borderBottom: '0.5px solid var(--c-border)' }}>
           {[
             { key: 'pendientes', label: `Pendientes de confirmar (${pendientes.length})` },
             { key: 'todas', label: `Todas (${todas.length})` },
@@ -42,7 +42,7 @@ export default function Facturas() {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {pendientes.map((f) => (
-                  <div key={f.id} className="bg-surface rounded-lg flex flex-col" style={{ border: '0.5px solid #222' }}>
+                  <div key={f.id} className="bg-surface rounded-lg flex flex-col" style={{ border: '0.5px solid var(--c-border)' }}>
                     <div className="p-4 flex-1">
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <code className="text-primary text-[12px] break-all leading-tight">{f.nombre_archivo}</code>
@@ -57,7 +57,7 @@ export default function Facturas() {
                         ))}
                       </div>
                       {f.clientes?.length > 0 && (
-                        <div className="mt-2 pt-2" style={{ borderTop: '0.5px solid #1A1A1A' }}>
+                        <div className="mt-2 pt-2" style={{ borderTop: '0.5px solid var(--c-border-s)' }}>
                           <span className="text-muted-dark text-[11px]">Clientes detectados: </span>
                           <span className="text-muted text-[12px]">{f.clientes.map((c) => c.nombre).join(', ')}</span>
                         </div>

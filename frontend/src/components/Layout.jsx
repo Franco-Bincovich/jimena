@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../hooks/useTheme'
 import { CAMBIAR_PASSWORD_ITEM, CONFIG_ITEM, NAV_SECTIONS, NavItem } from './SideNav'
 
 export default function Layout({ children }) {
   const location = useLocation()
   const { logout, user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
@@ -28,10 +30,10 @@ export default function Layout({ children }) {
         className={`flex flex-col flex-shrink-0 fixed top-0 left-0 bottom-0 z-30 transition-transform duration-200 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
-        style={{ width: '210px', backgroundColor: '#0A0A0A', borderRight: '0.5px solid #1A1A1A' }}
+        style={{ width: '210px', backgroundColor: 'var(--c-sidebar)', borderRight: '0.5px solid var(--c-border-s)' }}
       >
         {/* Header */}
-        <div className="px-4 py-5 flex items-start justify-between" style={{ borderBottom: '0.5px solid #1A1A1A' }}>
+        <div className="px-4 py-5 flex items-start justify-between" style={{ borderBottom: '0.5px solid var(--c-border-s)' }}>
           <div>
             <div className="flex items-center gap-2.5 mb-0.5">
               <div className="flex items-center justify-center rounded" style={{ width: '22px', height: '22px', backgroundColor: '#FF6B00', flexShrink: 0 }}>
@@ -72,14 +74,14 @@ export default function Layout({ children }) {
         </nav>
 
         {/* Config — al fondo */}
-        <div className="px-2 py-3" style={{ borderTop: '0.5px solid #1A1A1A' }}>
+        <div className="px-2 py-3" style={{ borderTop: '0.5px solid var(--c-border-s)' }}>
           <p className="text-muted-dark px-3 mb-1 uppercase tracking-wider" style={{ fontSize: '10px' }}>Sistema</p>
           <NavItem item={CONFIG_ITEM} active={location.pathname === CONFIG_ITEM.path} />
           <NavItem item={CAMBIAR_PASSWORD_ITEM} active={location.pathname === CAMBIAR_PASSWORD_ITEM.path} />
         </div>
 
-        {/* Usuario + logout */}
-        <div className="px-4 py-3 flex items-center gap-2" style={{ borderTop: '0.5px solid #1A1A1A' }}>
+        {/* Usuario + logout + toggle */}
+        <div className="px-4 py-3 flex items-center gap-2" style={{ borderTop: '0.5px solid var(--c-border-s)' }}>
           <div className="flex-1 min-w-0">
             <p className="text-text truncate" style={{ fontSize: '12px', fontWeight: '500' }}>
               {user?.nombre || '—'}
@@ -89,9 +91,26 @@ export default function Layout({ children }) {
             </p>
           </div>
           <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            style={{ color: 'var(--c-muted-d)', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+            className="hover:text-muted transition-colors"
+          >
+            {theme === 'dark' ? (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="3" stroke="currentColor" strokeWidth="1.1" />
+                <path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.93 2.93l1.06 1.06M10.01 10.01l1.06 1.06M2.93 11.07l1.06-1.06M10.01 3.99l1.06-1.06" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M11.5 8.5A5 5 0 015.5 2.5a5 5 0 100 9 5 5 0 006-3z" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
+          <button
             onClick={logout}
             title="Cerrar sesión"
-            style={{ color: '#555', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+            style={{ color: 'var(--c-muted-d)', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
             className="hover:text-muted transition-colors"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -106,7 +125,7 @@ export default function Layout({ children }) {
       {/* Mobile header */}
       <header
         className="md:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4"
-        style={{ height: '52px', backgroundColor: '#0A0A0A', borderBottom: '0.5px solid #1A1A1A' }}
+        style={{ height: '52px', backgroundColor: 'var(--c-sidebar)', borderBottom: '0.5px solid var(--c-border-s)' }}
       >
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center rounded" style={{ width: '22px', height: '22px', backgroundColor: '#FF6B00', flexShrink: 0 }}>
@@ -131,7 +150,7 @@ export default function Layout({ children }) {
       {/* Main content */}
       <main
         className="flex-1 overflow-y-auto md:ml-[210px] p-4 md:p-7"
-        style={{ backgroundColor: '#111111', minHeight: '100vh' }}
+        style={{ backgroundColor: 'var(--c-bg)', minHeight: '100vh' }}
       >
         {/* Spacer for mobile fixed header */}
         <div className="md:hidden" style={{ height: '52px' }} />

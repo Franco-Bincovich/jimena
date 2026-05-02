@@ -17,7 +17,7 @@ export function Spinner() {
 export function AdjuntoBadge({ factura }) {
   if (!factura) return null
   const badge = (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[12px] font-mono" style={{ backgroundColor: '#0A2A0A', color: '#5CB85C', border: '0.5px solid #1A4A1A' }}>
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[12px] font-mono" style={{ backgroundColor: 'var(--c-ok-bg)', color: 'var(--c-ok-text)', border: '0.5px solid var(--c-ok-border)' }}>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M2 10.5L8.5 4a2 2 0 00-2.83-2.83L1.17 5.67A3 3 0 005.41 9.91L9 6.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
       </svg>
@@ -32,7 +32,7 @@ export function AdjuntoBadge({ factura }) {
 
 export function GoogleWarning() {
   return (
-    <div className="flex items-center gap-2 px-3 py-2.5 rounded-md text-[12.5px] mb-5" style={{ backgroundColor: '#1E1800', border: '0.5px solid #3A3000', color: '#D4920A' }}>
+    <div className="flex items-center gap-2 px-3 py-2.5 rounded-md text-[12.5px] mb-5" style={{ backgroundColor: 'var(--c-warn-bg)', border: '0.5px solid var(--c-warn-border)', color: 'var(--c-warn-text)' }}>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.1" />
         <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />

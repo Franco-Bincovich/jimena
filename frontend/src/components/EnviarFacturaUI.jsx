@@ -11,7 +11,7 @@ export function EnviarSkeletonLoader() {
   return (
     <div className="flex flex-col gap-4">
       {[1, 2].map((i) => (
-        <div key={i} className="rounded-lg p-5 animate-pulse" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+        <div key={i} className="rounded-lg p-5 animate-pulse" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
           <div className="h-2.5 bg-surface-hover rounded w-48 mb-4" />
           <div className="grid grid-cols-2 gap-4">
             <div className="h-8 bg-surface-hover rounded" />
@@ -30,7 +30,7 @@ export function ClientesEnvioSection({
   addCliente, removeCliente, clientesValidos, primerCliente,
 }) {
   return (
-    <div className="p-5 rounded-lg" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+    <div className="p-5 rounded-lg" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
       <SectionLabel n="1">Destinatario, factura y plantilla</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
         <FormField label="Factura">
@@ -59,7 +59,7 @@ export function ClientesEnvioSection({
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-text text-[12.5px] font-medium">Clientes <span className="text-error ml-0.5">*</span></p>
-          <button type="button" onClick={addCliente} className="flex items-center gap-1 px-2.5 py-1.5 text-muted hover:text-text text-[12px] rounded transition-colors" style={{ border: '0.5px solid #2A2A2A' }}>
+          <button type="button" onClick={addCliente} className="flex items-center gap-1 px-2.5 py-1.5 text-muted hover:text-text text-[12px] rounded transition-colors" style={{ border: '0.5px solid var(--c-border-l)' }}>
             + Agregar cliente
           </button>
         </div>
@@ -87,13 +87,13 @@ export function ClientesEnvioSection({
           })}
         </div>
         {clientesValidos.length === 0 && (
-          <p className="text-[11.5px] mt-2" style={{ color: '#D4920A' }}>Necesitás al menos un cliente para poder enviar.</p>
+          <p className="text-[11.5px] mt-2" style={{ color: 'var(--c-warn-text)' }}>Necesitás al menos un cliente para poder enviar.</p>
         )}
         {clientesValidos.length > 1 && primerCliente && (
           <p className="text-muted-dark text-[11.5px] mt-2">
             El email se enviará a <span className="text-muted">{primerCliente.nombre}</span>.
             Los montos de todos los clientes aparecen en{' '}
-            <code className="font-mono" style={{ color: '#555' }}>{'{{clientes_con_montos}}'}</code>.
+            <code className="font-mono" style={{ color: 'var(--c-muted-d)' }}>{'{{clientes_con_montos}}'}</code>.
           </p>
         )}
       </div>
@@ -103,7 +103,7 @@ export function ClientesEnvioSection({
 
 export function DatosManualesSection({ datosManuales, setDatoField, proveedores }) {
   return (
-    <div className="p-5 rounded-lg" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+    <div className="p-5 rounded-lg" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
       <SectionLabel n="1.5">Datos de la factura</SectionLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField label="Proveedor">

@@ -19,7 +19,7 @@ export default function Configuracion() {
     return (
       <div className="flex flex-col gap-5">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-lg p-5 animate-pulse" style={{ backgroundColor: '#171717', border: '0.5px solid #222' }}>
+          <div key={i} className="rounded-lg p-5 animate-pulse" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border)' }}>
             <div className="h-3 bg-surface-hover rounded w-40 mb-5" />
             <div className="h-8 bg-surface-hover rounded w-full" />
           </div>
@@ -37,16 +37,16 @@ export default function Configuracion() {
       </div>
 
       {allDone ? (
-        <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg mb-5 text-[13px]" style={{ backgroundColor: '#0A2A0A', border: '0.5px solid #1A4A1A', color: '#5CB85C' }}>
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg mb-5 text-[13px]" style={{ backgroundColor: 'var(--c-ok-bg)', border: '0.5px solid var(--c-ok-border)', color: 'var(--c-ok-text)' }}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 7.5l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
           Sistema configurado y listo para usar
         </div>
       ) : (
-        <div className="px-4 py-3 rounded-lg mb-5" style={{ backgroundColor: '#171717', border: '0.5px solid #2A2A2A' }}>
+        <div className="px-4 py-3 rounded-lg mb-5" style={{ backgroundColor: 'var(--c-surface)', border: '0.5px solid var(--c-border-l)' }}>
           <p className="text-[12px] text-muted-dark mb-2 uppercase tracking-wider">Pasos pendientes</p>
           <div className="flex flex-col gap-1.5">
             {checks.filter((c) => !c.done).map((c) => (
-              <div key={c.key} className="flex items-center gap-2 text-[12.5px]" style={{ color: '#D4920A' }}>
+              <div key={c.key} className="flex items-center gap-2 text-[12.5px]" style={{ color: 'var(--c-warn-text)' }}>
                 <IconWarn />
                 {c.label}
               </div>

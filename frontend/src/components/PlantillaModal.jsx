@@ -40,11 +40,11 @@ export default function PlantillaModal({ open, saving, editItem, form, set, onCl
         <div>
           <label className="block text-[12.5px] text-text mb-1.5">Cuerpo <span className="text-error">*</span></label>
           <textarea ref={cuerpoRef} rows={10} value={form.cuerpo} onChange={set('cuerpo')} placeholder="Redactá el cuerpo del email. Usá las variables de abajo para insertar datos dinámicos." required style={{ resize: 'vertical' }} />
-          <div className="mt-2 p-3 rounded-md" style={{ backgroundColor: '#141414', border: '0.5px solid #222' }}>
+          <div className="mt-2 p-3 rounded-md" style={{ backgroundColor: 'var(--c-bg)', border: '0.5px solid var(--c-border)' }}>
             <p className="text-muted-dark text-[11px] mb-2 uppercase tracking-wider">Variables disponibles — clic para insertar</p>
             <div className="flex flex-wrap gap-1.5">
               {VARS[form.tipo]?.map((v) => (
-                <button key={v} type="button" onClick={() => insertVar(v)} className="px-2 py-0.5 rounded text-[11.5px] font-mono transition-colors hover:opacity-80" style={{ backgroundColor: '#1E1E1E', color: '#888', border: '0.5px solid #2A2A2A' }}>
+                <button key={v} type="button" onClick={() => insertVar(v)} className="px-2 py-0.5 rounded text-[11.5px] font-mono transition-colors hover:opacity-80" style={{ backgroundColor: 'var(--c-surface-hover)', color: 'var(--c-muted)', border: '0.5px solid var(--c-border-l)' }}>
                   {`{{${v}}}`}
                 </button>
               ))}

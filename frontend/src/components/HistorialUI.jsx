@@ -17,11 +17,11 @@ export function formatDate(dateStr) {
 
 export function TipoBadge({ tipo }) {
   return tipo === 'pedido' ? (
-    <span className="px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: '#2A1500', color: '#FF6B00', border: '0.5px solid #3A2000' }}>
+    <span className="px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: 'var(--c-warn-bg)', color: 'var(--c-warn-text)', border: '0.5px solid var(--c-warn-border)' }}>
       pedido
     </span>
   ) : (
-    <span className="px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: '#0A2A0A', color: '#5CB85C', border: '0.5px solid #1A4A1A' }}>
+    <span className="px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: 'var(--c-ok-bg)', color: 'var(--c-ok-text)', border: '0.5px solid var(--c-ok-border)' }}>
       envío
     </span>
   )
@@ -29,11 +29,11 @@ export function TipoBadge({ tipo }) {
 
 export function EstadoBadge({ estado, errorMsg }) {
   return estado === 'enviado' ? (
-    <span className="px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: '#0A2A0A', color: '#5CB85C', border: '0.5px solid #1A4A1A' }}>
+    <span className="px-2 py-0.5 rounded text-[11px] font-medium" style={{ backgroundColor: 'var(--c-ok-bg)', color: 'var(--c-ok-text)', border: '0.5px solid var(--c-ok-border)' }}>
       enviado
     </span>
   ) : (
-    <span className="px-2 py-0.5 rounded text-[11px] font-medium cursor-help" style={{ backgroundColor: '#2A0F0F', color: '#E07070', border: '0.5px solid #4A1E1E' }} title={errorMsg || 'Error desconocido'}>
+    <span className="px-2 py-0.5 rounded text-[11px] font-medium cursor-help" style={{ backgroundColor: 'var(--c-error-bg)', color: 'var(--c-error)', border: '0.5px solid var(--c-border-l)' }} title={errorMsg || 'Error desconocido'}>
       error
     </span>
   )
@@ -41,7 +41,7 @@ export function EstadoBadge({ estado, errorMsg }) {
 
 export function Skeleton() {
   return Array.from({ length: 4 }).map((_, i) => (
-    <tr key={i} style={{ borderTop: '0.5px solid #222' }}>
+    <tr key={i} style={{ borderTop: '0.5px solid var(--c-border)' }}>
       {COLS.map((c) => (
         <td key={c} className="px-4 py-3">
           <div className="h-3 rounded animate-pulse bg-surface-hover" style={{ width: '70%' }} />

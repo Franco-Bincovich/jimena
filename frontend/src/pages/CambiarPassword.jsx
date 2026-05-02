@@ -47,12 +47,12 @@ export default function CambiarPassword() {
   }
 
   const inputStyle = {
-    backgroundColor: '#111111',
-    border: '0.5px solid #2A2A2A',
+    backgroundColor: 'var(--c-input-bg)',
+    border: '0.5px solid var(--c-input-border)',
     borderRadius: '6px',
     padding: '8px 12px',
     fontSize: '13px',
-    color: '#E5E5E5',
+    color: 'var(--c-text)',
     outline: 'none',
     width: '100%',
   }
@@ -65,11 +65,11 @@ export default function CambiarPassword() {
 
       <div
         className="rounded-lg p-6 w-full"
-        style={{ backgroundColor: '#0A0A0A', border: '0.5px solid #1A1A1A', maxWidth: '400px' }}
+        style={{ backgroundColor: 'var(--c-sidebar)', border: '0.5px solid var(--c-border-s)', maxWidth: '400px' }}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: '12px', color: '#888' }}>Contraseña actual</label>
+            <label className="text-muted" style={{ fontSize: '12px' }}>Contraseña actual</label>
             <input
               type="password"
               name="password_actual"
@@ -81,7 +81,7 @@ export default function CambiarPassword() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: '12px', color: '#888' }}>Contraseña nueva</label>
+            <label className="text-muted" style={{ fontSize: '12px' }}>Contraseña nueva</label>
             <input
               type="password"
               name="password_nuevo"
@@ -93,7 +93,7 @@ export default function CambiarPassword() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: '12px', color: '#888' }}>Confirmar contraseña nueva</label>
+            <label className="text-muted" style={{ fontSize: '12px' }}>Confirmar contraseña nueva</label>
             <input
               type="password"
               name="confirmar"
@@ -104,9 +104,9 @@ export default function CambiarPassword() {
             />
           </div>
 
-          {error && <p style={{ fontSize: '12px', color: '#FF4D4D' }}>{error}</p>}
+          {error && <p style={{ fontSize: '12px', color: 'var(--c-error)' }}>{error}</p>}
           {success && (
-            <p style={{ fontSize: '12px', color: '#4CAF50' }}>Contraseña actualizada correctamente</p>
+            <p style={{ fontSize: '12px', color: 'var(--c-ok-text)' }}>Contraseña actualizada correctamente</p>
           )}
 
           <button
