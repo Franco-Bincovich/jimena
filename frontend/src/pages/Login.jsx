@@ -5,7 +5,7 @@ import { saveSession } from '../hooks/useAuth'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,7 +15,7 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const data = await api.post('/api/auth/login', { email, password })
+      const data = await api.post('/api/auth/login', { username, password })
       saveSession(data.access_token, { nombre: data.nombre, email: data.email })
       navigate('/', { replace: true })
     } catch (err) {
@@ -50,11 +50,11 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: '12px', color: '#888' }}>Email</label>
+            <label style={{ fontSize: '12px', color: '#888' }}>Usuario</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               autoFocus
               style={{
