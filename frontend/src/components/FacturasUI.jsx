@@ -108,6 +108,7 @@ export function GmailBuscarSection({ googleConnected, searching, handleBuscar })
 export function FacturasTodasTab({ loading, todas, setDeleteModal }) {
   return (
     <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid #222' }}>
+      <div style={{ overflowX: 'auto' }}>
       <table className="w-full">
         <thead>
           <tr style={{ borderBottom: '0.5px solid #222' }}>
@@ -134,6 +135,7 @@ export function FacturasTodasTab({ loading, todas, setDeleteModal }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

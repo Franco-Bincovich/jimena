@@ -31,24 +31,25 @@ export default function Historial() {
     <div>
       <Toast />
       <div className="mb-6">
-        <h1 className="text-text font-semibold text-[15px] mb-0.5">Historial de envíos</h1>
+        <h1 className="text-text font-semibold text-xl md:text-2xl mb-0.5">Historial de envíos</h1>
         <p className="text-muted text-[12.5px]">Registro de todos los emails enviados desde el sistema</p>
       </div>
 
-      <div className="flex gap-3 mb-4">
-        <div style={{ width: '170px' }}>
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="w-full sm:w-auto">
           <select value={tipoFilter} onChange={(e) => setTipoFilter(e.target.value)}>
             <option value="all">Todos los tipos</option>
             <option value="pedido">Pedido</option>
             <option value="envio">Envío</option>
           </select>
         </div>
-        <div style={{ width: '300px' }}>
+        <div className="w-full sm:flex-1">
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por destinatario o asunto…" />
         </div>
       </div>
 
       <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid #222' }}>
+        <div style={{ overflowX: 'auto' }}>
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '0.5px solid #222' }}>
@@ -84,6 +85,7 @@ export default function Historial() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

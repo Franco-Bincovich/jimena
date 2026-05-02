@@ -82,15 +82,16 @@ export default function Clientes() {
       <Toast />
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-text font-semibold text-[15px] mb-0.5">Clientes</h1>
+          <h1 className="text-text font-semibold text-xl md:text-2xl mb-0.5">Clientes</h1>
           <p className="text-muted text-[12.5px]">Administrá los clientes a quienes enviás facturas</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-hover text-white text-[12.5px] font-medium rounded-md transition-colors min-h-[36px]">
+        <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-hover text-white text-[12.5px] font-medium rounded-md transition-colors min-h-[44px]">
           + Agregar
         </button>
       </div>
 
       <div className="bg-surface rounded-lg overflow-hidden" style={{ border: '0.5px solid #222' }}>
+        <div style={{ overflowX: 'auto' }}>
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '0.5px solid #222' }}>
@@ -123,6 +124,7 @@ export default function Clientes() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <ClienteModal open={modalOpen} saving={saving} editItem={editItem} form={form} set={set} onClose={() => setModalOpen(false)} onSave={handleSave} />

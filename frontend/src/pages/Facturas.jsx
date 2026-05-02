@@ -15,7 +15,7 @@ export default function Facturas() {
     <div>
       <Toast />
       <div className="mb-6">
-        <h1 className="text-text font-semibold text-[15px] mb-0.5">Facturas recibidas</h1>
+        <h1 className="text-text font-semibold text-xl md:text-2xl mb-0.5">Facturas recibidas</h1>
         <p className="text-muted text-[12.5px]">Procesá las facturas de Gmail y confirmá su carga en Drive</p>
       </div>
 

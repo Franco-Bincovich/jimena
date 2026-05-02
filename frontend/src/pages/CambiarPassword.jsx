@@ -59,12 +59,12 @@ export default function CambiarPassword() {
 
   return (
     <div>
-      <h1 className="font-semibold text-text mb-6" style={{ fontSize: '17px' }}>
+      <h1 className="font-semibold text-text text-xl md:text-2xl mb-6">
         Cambiar contraseña
       </h1>
 
       <div
-        className="rounded-lg p-6"
+        className="rounded-lg p-6 w-full"
         style={{ backgroundColor: '#0A0A0A', border: '0.5px solid #1A1A1A', maxWidth: '400px' }}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -122,6 +122,7 @@ export default function CambiarPassword() {
               fontWeight: '500',
               cursor: loading ? 'not-allowed' : 'pointer',
               marginTop: '4px',
+              minHeight: '44px',
             }}
           >
             {loading ? 'Guardando…' : 'Cambiar contraseña'}

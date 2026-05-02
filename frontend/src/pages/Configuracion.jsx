@@ -32,7 +32,7 @@ export default function Configuracion() {
     <div>
       <cfg.Toast />
       <div className="mb-6">
-        <h1 className="text-text font-semibold text-[15px] mb-0.5">Configuración</h1>
+        <h1 className="text-text font-semibold text-xl md:text-2xl mb-0.5">Configuración</h1>
         <p className="text-muted text-[12.5px]">Conectá Google y configurá Drive y Sheets para usar el sistema</p>
       </div>
 

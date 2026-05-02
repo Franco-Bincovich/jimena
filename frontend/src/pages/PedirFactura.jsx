@@ -26,7 +26,7 @@ export default function PedirFactura() {
     <div>
       <Toast />
       <div className="mb-6">
-        <h1 className="text-text font-semibold text-[15px] mb-0.5">Pedir factura a proveedor</h1>
+        <h1 className="text-text font-semibold text-xl md:text-2xl mb-0.5">Pedir factura a proveedor</h1>
         <p className="text-muted text-[12.5px]">Enviá un email al proveedor solicitando las facturas del período</p>
       </div>
 
@@ -93,11 +93,11 @@ export default function PedirFactura() {
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 mt-5">
-        <button type="button" onClick={() => setPreviewOpen(true)} disabled={!asunto && !cuerpo} className="px-4 py-2 text-muted hover:text-text text-[12.5px] rounded-md transition-colors min-h-[36px] disabled:opacity-40" style={{ border: '0.5px solid #2A2A2A' }}>
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-5">
+        <button type="button" onClick={() => setPreviewOpen(true)} disabled={!asunto && !cuerpo} className="px-4 py-2 text-muted hover:text-text text-[12.5px] rounded-md transition-colors min-h-[44px] disabled:opacity-40" style={{ border: '0.5px solid #2A2A2A' }}>
           Vista previa
         </button>
-        <button type="button" onClick={handleEnviar} disabled={sending || googleConnected === false || googleConnected === null} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-[12.5px] font-medium rounded-md transition-colors min-h-[36px]">
+        <button type="button" onClick={handleEnviar} disabled={sending || googleConnected === false || googleConnected === null} className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-[12.5px] font-medium rounded-md transition-colors min-h-[44px]">
           {sending ? <><Spinner /> Enviando…</> : 'Enviar pedido →'}
         </button>
       </div>

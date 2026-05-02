@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { CAMBIAR_PASSWORD_ITEM, CONFIG_ITEM, NAV_SECTIONS, NavItem } from './SideNav'
@@ -5,24 +6,53 @@ import { CAMBIAR_PASSWORD_ITEM, CONFIG_ITEM, NAV_SECTIONS, NavItem } from './Sid
 export default function Layout({ children }) {
   const location = useLocation()
   const { logout, user } = useAuth()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [location.pathname])
 
   return (
     <div className="flex min-h-screen">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 md:hidden"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
-        className="flex flex-col flex-shrink-0"
-        style={{ width: '210px', backgroundColor: '#0A0A0A', borderRight: '0.5px solid #1A1A1A', position: 'fixed', top: 0, left: 0, bottom: 0 }}
+        className={`flex flex-col flex-shrink-0 fixed top-0 left-0 bottom-0 z-30 transition-transform duration-200 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+        style={{ width: '210px', backgroundColor: '#0A0A0A', borderRight: '0.5px solid #1A1A1A' }}
       >
         {/* Header */}
-        <div className="px-4 py-5" style={{ borderBottom: '0.5px solid #1A1A1A' }}>
-          <div className="flex items-center gap-2.5 mb-0.5">
-            <div className="flex items-center justify-center rounded" style={{ width: '22px', height: '22px', backgroundColor: '#FF6B00', flexShrink: 0 }}>
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                <path d="M1.5 2h8v7l-1.5-1L6.5 9 5 8 3.5 9 2 8l-.5.5V2z" fill="white" />
-              </svg>
+        <div className="px-4 py-5 flex items-start justify-between" style={{ borderBottom: '0.5px solid #1A1A1A' }}>
+          <div>
+            <div className="flex items-center gap-2.5 mb-0.5">
+              <div className="flex items-center justify-center rounded" style={{ width: '22px', height: '22px', backgroundColor: '#FF6B00', flexShrink: 0 }}>
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <path d="M1.5 2h8v7l-1.5-1L6.5 9 5 8 3.5 9 2 8l-.5.5V2z" fill="white" />
+                </svg>
+              </div>
+              <span className="font-semibold text-text" style={{ fontSize: '13px' }}>Facturas</span>
             </div>
-            <span className="font-semibold text-text" style={{ fontSize: '13px' }}>Facturas</span>
+            <p className="text-muted-dark" style={{ fontSize: '11px', marginLeft: '34px' }}>Sistema interno</p>
           </div>
-          <p className="text-muted-dark" style={{ fontSize: '11px', marginLeft: '34px' }}>Sistema interno</p>
+          {/* Close button — only on mobile */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden flex items-center justify-center text-muted-dark hover:text-muted transition-colors"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: '44px', minWidth: '44px', marginTop: '-8px', marginRight: '-8px' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
         {/* Nav sections */}
@@ -73,7 +103,38 @@ export default function Layout({ children }) {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto" style={{ marginLeft: '210px', backgroundColor: '#111111', minHeight: '100vh', padding: '28px' }}>
+      {/* Mobile header */}
+      <header
+        className="md:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4"
+        style={{ height: '52px', backgroundColor: '#0A0A0A', borderBottom: '0.5px solid #1A1A1A' }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center rounded" style={{ width: '22px', height: '22px', backgroundColor: '#FF6B00', flexShrink: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1.5 2h8v7l-1.5-1L6.5 9 5 8 3.5 9 2 8l-.5.5V2z" fill="white" />
+            </svg>
+          </div>
+          <span className="font-semibold text-text" style={{ fontSize: '13px' }}>Facturas</span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="flex items-center justify-center text-muted hover:text-text transition-colors"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: '44px', minWidth: '44px' }}
+          aria-label="Abrir menú"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </header>
+
+      {/* Main content */}
+      <main
+        className="flex-1 overflow-y-auto md:ml-[210px] p-4 md:p-7"
+        style={{ backgroundColor: '#111111', minHeight: '100vh' }}
+      >
+        {/* Spacer for mobile fixed header */}
+        <div className="md:hidden" style={{ height: '52px' }} />
         {children}
       </main>
     </div>
