@@ -1,5 +1,6 @@
 from typing import Optional
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from models import Pedido, PedidoItem
@@ -13,6 +14,14 @@ def find_all(db: Session) -> list[Pedido]:
 def find_by_id(db: Session, pedido_id: str) -> Optional[Pedido]:
     """Devuelve un Pedido por su ID o None si no existe."""
     return db.query(Pedido).filter(Pedido.id == pedido_id).first()
+
+
+def find_by_proveedor_mes_anio(db: Session, proveedor_id: str, mes: int, anio: int) -> Optional[Pedido]:
+    return db.query(Pedido).filter(
+        Pedido.proveedor_id == proveedor_id,
+        Pedido.mes == mes,
+        Pedido.anio == anio,
+    ).first()
 
 
 def create(
@@ -32,9 +41,13 @@ def create(
         fecha_hasta=fecha_hasta,
     )
     db.add(pedido)
-    db.commit()
-    db.refresh(pedido)
-    return pedido
+    try:
+        db.commit()
+        db.refresh(pedido)
+        return pedido
+    except IntegrityError:
+        db.rollback()
+        return find_by_proveedor_mes_anio(db, proveedor_id, mes, anio)
 
 
 def create_item(
