@@ -116,18 +116,22 @@ def enviar(
 
     fecha_desde_dt = datetime(fecha_desde.year, fecha_desde.month, fecha_desde.day)
     fecha_hasta_dt = datetime(fecha_hasta.year, fecha_hasta.month, fecha_hasta.day)
-    pedido = pedido_repo.create(db, proveedor_id, mes, anio, fecha_desde_dt, fecha_hasta_dt)
-    for item in items:
-        pedido_repo.create_item(db, pedido.id, str(item.cliente_id), item.consultas_api)
-    pedido_repo.marcar_enviado(db, pedido.id, gmail_id)
+    pedido, created = pedido_repo.create(db, proveedor_id, mes, anio, fecha_desde_dt, fecha_hasta_dt)
 
     sheets_rows = []
-    try:
-        sheets_rows = sheets_writer_service.registrar_pedido(
-            pedido, pedido_repo.get_items(db, pedido.id), db
-        )
-    except Exception as exc:
-        logger.error("Error en Sheets (best-effort)", extra={"pedido_id": pedido.id, "error": str(exc)})
+    if created:
+        for item in items:
+            pedido_repo.create_item(db, pedido.id, str(item.cliente_id), item.consultas_api)
+        pedido_repo.marcar_enviado(db, pedido.id, gmail_id)
+        try:
+            sheets_rows = sheets_writer_service.registrar_pedido(
+                pedido, pedido_repo.get_items(db, pedido.id), db
+            )
+        except Exception as exc:
+            logger.error("Error en Sheets (best-effort)", extra={"pedido_id": pedido.id, "error": str(exc)})
+    else:
+        pedido_repo.marcar_enviado(db, pedido.id, gmail_id)
+        logger.info("Pedido reutilizado, items y Sheets omitidos", extra={"pedido_id": pedido.id})
 
     _registrar_historial(db, asunto, dest_email, dest_nombre, "enviado", gmail_message_id=gmail_id)
     logger.info("Pedido enviado", extra={"pedido_id": pedido.id, "proveedor": dest_nombre})

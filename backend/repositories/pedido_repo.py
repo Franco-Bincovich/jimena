@@ -31,8 +31,13 @@ def create(
     anio: int,
     fecha_desde,
     fecha_hasta,
-) -> Pedido:
-    """Crea y persiste un Pedido nuevo en estado 'borrador'."""
+) -> tuple[Pedido, bool]:
+    """
+    Crea un Pedido nuevo. Si ya existe uno para el mismo proveedor+mes+año lo reutiliza.
+
+    Returns:
+        (pedido, created) — created=False cuando se reutilizó un pedido existente.
+    """
     pedido = Pedido(
         proveedor_id=proveedor_id,
         mes=mes,
@@ -44,10 +49,10 @@ def create(
     try:
         db.commit()
         db.refresh(pedido)
-        return pedido
+        return pedido, True
     except IntegrityError:
         db.rollback()
-        return find_by_proveedor_mes_anio(db, proveedor_id, mes, anio)
+        return find_by_proveedor_mes_anio(db, proveedor_id, mes, anio), False
 
 
 def create_item(
