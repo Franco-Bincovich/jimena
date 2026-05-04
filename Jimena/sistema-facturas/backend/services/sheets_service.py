@@ -6,9 +6,8 @@ from services import google_auth_service
 from utils.errors import AppError
 
 _HEADERS = [
-    "Fecha", "Hora", "Tipo", "Proyecto", "CUIT", "Mes/Año",
-    "Proveedor", "Consumos API", "Factura", "Link Drive",
-    "Monto", "Estado", "Email Destinatario",
+    "Proyecto", "CUIT", "Mes/Año", "Proveedor", "Consumos",
+    "Factura", "Pago", "Retencion", "Monto", "Mail",
 ]
 
 
@@ -62,7 +61,7 @@ def _inicializar_headers(service, sheet_id: str) -> None:
     Consumos API | Factura | Link Drive | Monto | Estado | Email Destinatario.
     """
     resp = service.spreadsheets().values().get(
-        spreadsheetId=sheet_id, range="A1:M1"
+        spreadsheetId=sheet_id, range="A1:J1"
     ).execute()
     if resp.get("values"):
         return

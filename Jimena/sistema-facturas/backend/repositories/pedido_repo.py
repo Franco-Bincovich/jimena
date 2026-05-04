@@ -1,5 +1,6 @@
 from typing import Optional
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from models import Pedido, PedidoItem
@@ -40,9 +41,13 @@ def create(
         fecha_hasta=fecha_hasta,
     )
     db.add(pedido)
-    db.commit()
-    db.refresh(pedido)
-    return pedido
+    try:
+        db.commit()
+        db.refresh(pedido)
+        return pedido
+    except IntegrityError:
+        db.rollback()
+        return find_by_proveedor_mes_anio(db, proveedor_id, mes, anio)
 
 
 def create_item(

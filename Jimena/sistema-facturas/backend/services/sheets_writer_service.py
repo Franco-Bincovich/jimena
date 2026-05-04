@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import Optional
 
 from googleapiclient.discovery import build
@@ -13,20 +12,11 @@ from utils.logger import logger
 def registrar_pedido(pedido, items: list, db: Session) -> list[int]:
     """
     Agrega una fila por cada PedidoItem en el Sheet.
-    Campos: Fecha, Hora, Tipo=pedido, Proyecto (cliente.nombre), CUIT (cliente.cuit),
-    Mes/Año, Proveedor (proveedor.nombre), Consumos API, Estado=pedido_enviado.
 
-    Args:
-        pedido: Instancia de Pedido con proveedor y mes/anio cargados.
-        items: Lista de PedidoItem con relación a cliente cargada.
-        db: Sesión de base de datos.
-
-    Returns:
-        Lista de números de fila escritos en el Sheet.
-
-    Raises:
-        AppError SHEET_NOT_FOUND 404 si no hay sheet_id configurado.
-        AppError SHEET_WRITE_FAILED 500 si falla la escritura.
+    Columnas (A-J):
+        A: Proyecto, B: CUIT, C: Mes/Año (MM/YYYY), D: Proveedor,
+        E: Consumos, F: Factura (vacío), G: Pago (vacío), H: Retencion (vacío),
+        I: Monto (vacío), J: Mail (email del proveedor).
     """
     config = google_config_repo.find(db)
     if not config or not config.sheet_id:
@@ -34,16 +24,24 @@ def registrar_pedido(pedido, items: list, db: Session) -> list[int]:
     credentials = google_auth_service.get_credentials(db)
     service = build("sheets", "v4", credentials=credentials)
 
-    ahora = datetime.now(timezone.utc)
+    mes_anio = f"{pedido.mes:02d}/{pedido.anio}"
+    proveedor_nombre = pedido.proveedor.nombre if pedido.proveedor else ""
+    proveedor_email = pedido.proveedor.email if pedido.proveedor else ""
+
     filas = []
     for item in items:
         cli = item.cliente
         filas.append([
-            ahora.strftime("%d/%m/%Y"), ahora.strftime("%H:%M"), "pedido",
-            cli.nombre if cli else "", cli.cuit or "" if cli else "",
-            f"{pedido.mes}/{pedido.anio}",
-            pedido.proveedor.nombre if pedido.proveedor else "",
-            item.consultas_api or "", "", "", "", "pedido_enviado", "",
+            cli.nombre if cli else "",
+            cli.cuit or "" if cli else "",
+            mes_anio,
+            proveedor_nombre,
+            item.consultas_api if item.consultas_api is not None else "",
+            "",  # Factura
+            "",  # Pago
+            "",  # Retencion
+            "",  # Monto
+            proveedor_email,  # Mail
         ])
 
     try:
@@ -67,19 +65,13 @@ def registrar_envio(
     factura, cliente, drive_url: str, sheets_row: Optional[int], db: Session
 ) -> None:
     """
-    Si sheets_row existe, actualiza esa fila con Link Drive, Monto y Estado=enviado.
-    Si no hay sheets_row previa, agrega una fila nueva con todos los campos.
+    Si sheets_row existe, actualiza solo F (Factura) e I (Monto) de esa fila.
+    Si no hay sheets_row, agrega una fila nueva con la estructura de 10 columnas (A-J).
 
-    Args:
-        factura: Instancia de Factura con proveedor cargado.
-        cliente: Instancia de Cliente destinatario.
-        drive_url: URL del archivo en Drive.
-        sheets_row: Número de fila preexistente a actualizar, o None para agregar nueva.
-        db: Sesión de base de datos.
-
-    Raises:
-        AppError SHEET_NOT_FOUND 404 si no hay sheet_id configurado.
-        AppError SHEET_WRITE_FAILED 500 si falla la escritura.
+    Columnas (A-J):
+        A: Proyecto, B: CUIT, C: Mes/Año (MM/YYYY), D: Proveedor,
+        E: Consumos (vacío), F: Factura, G: Pago (vacío), H: Retencion (vacío),
+        I: Monto, J: Mail (email del cliente).
     """
     config = google_config_repo.find(db)
     if not config or not config.sheet_id:
@@ -89,22 +81,33 @@ def registrar_envio(
 
     try:
         if sheets_row:
-            service.spreadsheets().values().update(
+            service.spreadsheets().values().batchUpdate(
                 spreadsheetId=config.sheet_id,
-                range=f"J{sheets_row}:L{sheets_row}",
-                valueInputOption="RAW",
-                body={"values": [[drive_url, factura.monto_total or "", "enviado"]]},
+                body={
+                    "valueInputOption": "RAW",
+                    "data": [
+                        {"range": f"F{sheets_row}", "values": [[factura.numero_factura or ""]]},
+                        {"range": f"I{sheets_row}", "values": [[factura.monto_total or ""]]},
+                    ],
+                },
             ).execute()
         else:
-            ahora = datetime.now(timezone.utc)
             cli = cliente
+            mes_anio = ""
+            if factura.fecha_factura:
+                fd = factura.fecha_factura
+                mes_anio = f"{fd.month:02d}/{fd.year}"
             fila = [
-                ahora.strftime("%d/%m/%Y"), ahora.strftime("%H:%M"), "envio",
-                cli.nombre if cli else "", cli.cuit or "" if cli else "",
-                "", factura.proveedor.nombre if factura.proveedor else "",
-                "", factura.numero_factura or "", drive_url,
-                factura.monto_total or "", "enviado",
-                cli.email or "" if cli else "",
+                cli.nombre if cli else "",
+                cli.cuit or "" if cli else "",
+                mes_anio,
+                factura.proveedor.nombre if factura.proveedor else "",
+                "",  # Consumos
+                factura.numero_factura or "",
+                "",  # Pago
+                "",  # Retencion
+                factura.monto_total or "",
+                cli.email or "" if cli else "",  # Mail
             ]
             service.spreadsheets().values().append(
                 spreadsheetId=config.sheet_id,
