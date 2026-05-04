@@ -116,7 +116,9 @@ def enviar(
 
     fecha_desde_dt = datetime(fecha_desde.year, fecha_desde.month, fecha_desde.day)
     fecha_hasta_dt = datetime(fecha_hasta.year, fecha_hasta.month, fecha_hasta.day)
-    pedido = pedido_repo.create(db, proveedor_id, mes, anio, fecha_desde_dt, fecha_hasta_dt)
+    pedido = pedido_repo.find_by_proveedor_mes_anio(db, proveedor_id, mes, anio)
+    if pedido is None:
+        pedido = pedido_repo.create(db, proveedor_id, mes, anio, fecha_desde_dt, fecha_hasta_dt)
     for item in items:
         pedido_repo.create_item(db, pedido.id, str(item.cliente_id), item.consultas_api)
     pedido_repo.marcar_enviado(db, pedido.id, gmail_id)
