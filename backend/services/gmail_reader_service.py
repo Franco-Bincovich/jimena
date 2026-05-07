@@ -1,10 +1,8 @@
 import base64, json, os
-from io import BytesIO
 from typing import Optional
 
 import anthropic
 from googleapiclient.discovery import build
-from pdf2image import convert_from_path
 from sqlalchemy.orm import Session
 
 from repositories import cliente_repo, factura_repo, proveedor_repo
@@ -114,24 +112,17 @@ def _procesar_mensaje(
 
 def extraer_datos_factura(pdf_path: str) -> dict:
     """
-    Convierte la primera página del PDF a imagen JPEG y la envía a Claude
-    (claude-sonnet-4-20250514) para extraer datos de la factura.
+    Envía el PDF directamente a Claude como documento base64 para extraer datos.
+    No requiere Poppler ni conversión a imagen — compatible con Vercel.
     System prompt separado del user input (SEGURIDAD-PENTEST.md 6.1).
 
     Returns: dict con numero_factura, fecha_factura, monto_total, cuit_cliente,
              nombre_proveedor. Campos no extraíbles como null.
     """
-    _vacio = {
-        "numero_factura": None, "fecha_factura": None, "monto_total": None,
-        "cuit_cliente": None, "nombre_proveedor": None,
-    }
+    _vacio = {"numero_factura": None, "fecha_factura": None, "monto_total": None}
     try:
-        paginas = convert_from_path(pdf_path, first_page=1, last_page=1, fmt="jpeg")
-        if not paginas:
-            return _vacio
-        buf = BytesIO()
-        paginas[0].save(buf, format="JPEG")
-        img_b64 = base64.b64encode(buf.getvalue()).decode()
+        with open(pdf_path, "rb") as f:
+            pdf_b64 = base64.b64encode(f.read()).decode()
 
         from config.settings import settings  # lazy — evita falla en startup sin ANTHROPIC_API_KEY
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
@@ -139,11 +130,25 @@ def extraer_datos_factura(pdf_path: str) -> dict:
             model="claude-sonnet-4-20250514",
             max_tokens=500,
             system=_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": [{"type": "image", "source": {
-                "type": "base64", "media_type": "image/jpeg", "data": img_b64,
-            }}]}],
+            messages=[{
+                "role": "user",
+                "content": [{
+                    "type": "document",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "application/pdf",
+                        "data": pdf_b64,
+                    }
+                }]
+            }],
         )
-        return json.loads(resp.content[0].text)
+        raw = resp.content[0].text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        return json.loads(raw.strip())
     except Exception as exc:
-        logger.error("Error extrayendo datos de PDF", extra={"pdf_path": pdf_path, "error": str(exc), "tipo": type(exc).__name__})
+        logger.error("Error extrayendo datos de PDF",
+                     extra={"pdf_path": pdf_path, "error": str(exc), "tipo": type(exc).__name__})
         return _vacio
