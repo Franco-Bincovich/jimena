@@ -144,6 +144,6 @@ def extraer_datos_factura(pdf_path: str) -> dict:
             }}]}],
         )
         return json.loads(resp.content[0].text)
-    except Exception:
-        logger.error("Error extrayendo datos de PDF", extra={"pdf_path": pdf_path})
+    except Exception as exc:
+        logger.error("Error extrayendo datos de PDF", extra={"pdf_path": pdf_path, "error": str(exc), "tipo": type(exc).__name__})
         return _vacio
