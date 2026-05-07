@@ -1,5 +1,5 @@
 import base64, json, os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import anthropic
@@ -41,7 +41,7 @@ def buscar_facturas_nuevas(db: Session) -> list[dict]:
     if not emails_prov:
         return []
 
-    query = f"({' OR '.join(f'from:{e}' for e in emails_prov)}) has:attachment filename:pdf"
+    query = f"({' OR '.join(f'from:{e}' for e in emails_prov)}) has:attachment filename:pdf after:{(datetime.now() - timedelta(days=60)).strftime('%Y/%m/%d')}"
     msgs = service.users().messages().list(userId="me", q=query).execute().get("messages", [])
 
     detectadas = []
@@ -58,8 +58,12 @@ def buscar_facturas_nuevas(db: Session) -> list[dict]:
 def _procesar_mensaje(
     service, message_id: str, emails_prov: dict, db: Session
 ) -> Optional[dict]:
-    if factura_repo.find_by_gmail_message_id(db, message_id):
+    existing = factura_repo.find_by_gmail_message_id(db, message_id)
+    if existing and (existing.estado == "confirmada" or
+                     (existing.numero_factura and existing.monto_total)):
         return None
+    if existing:
+        factura_repo.delete(db, existing.id)
 
     msg = service.users().messages().get(userId="me", id=message_id, format="full").execute()
     fecha_mail = datetime.fromtimestamp(
