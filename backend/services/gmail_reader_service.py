@@ -92,12 +92,23 @@ def _procesar_mensaje(
     cuit = datos.get("cuit_cliente")
     cliente = cliente_repo.find_by_cuit(db, cuit) if cuit else None
 
+    fecha_str = datos.get("fecha_factura") or fecha_mail
+    fecha_factura = None
+    if fecha_str and isinstance(fecha_str, str):
+        try:
+            fecha_factura = datetime.strptime(fecha_str, "%d/%m/%Y").date()
+        except ValueError:
+            try:
+                fecha_factura = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+            except ValueError:
+                fecha_factura = None
+
     factura = factura_repo.create(db, {
         "nombre_archivo": stored_name,
         "proveedor_id": proveedor.id,
         "gmail_message_id": message_id,
         "numero_factura": datos.get("numero_factura"),
-        "fecha_factura": datos.get("fecha_factura") or fecha_mail,
+        "fecha_factura": fecha_factura,
         "monto_total": datos.get("monto_total"),
         "estado": "pendiente_confirmacion",
     })
