@@ -1,4 +1,5 @@
 import base64, json, os
+from datetime import datetime, timezone
 from typing import Optional
 
 import anthropic
@@ -61,6 +62,9 @@ def _procesar_mensaje(
         return None
 
     msg = service.users().messages().get(userId="me", id=message_id, format="full").execute()
+    fecha_mail = datetime.fromtimestamp(
+        int(msg["internalDate"]) / 1000, tz=timezone.utc
+    ).strftime("%Y-%m-%d")
     from_header = next(
         (h["value"] for h in msg["payload"]["headers"] if h["name"].lower() == "from"), ""
     )
@@ -93,6 +97,7 @@ def _procesar_mensaje(
         "proveedor_id": proveedor.id,
         "gmail_message_id": message_id,
         "numero_factura": datos.get("numero_factura"),
+        "fecha_factura": datos.get("fecha_factura") or fecha_mail,
         "monto_total": datos.get("monto_total"),
         "estado": "pendiente_confirmacion",
     })
