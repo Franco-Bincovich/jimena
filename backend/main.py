@@ -71,7 +71,10 @@ async def cors_middleware(request: Request, call_next):
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(Exception, unexpected_error_handler)
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+try:
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+except RuntimeError:
+    pass  # En Vercel el directorio no existe; los PDFs se sirven desde Supabase Storage
 
 _auth_dep = [Depends(get_current_user)]
 

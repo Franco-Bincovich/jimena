@@ -96,7 +96,7 @@ def descargar_pdf(file_id: str, nombre_archivo: str, db: Session) -> str:
     service = build("drive", "v3", credentials=credentials)
     try:
         data = service.files().get_media(fileId=file_id).execute()
-        local_path = os.path.join("uploads", nombre_archivo)
+        local_path = os.path.join("/tmp", nombre_archivo)
         with open(local_path, "wb") as f:
             f.write(data)
         return local_path

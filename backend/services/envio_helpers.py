@@ -43,7 +43,7 @@ def resolver_clientes(clientes_input: list, db: Session) -> List[ClienteConMonto
 
 def obtener_pdf_path(factura, db: Session) -> Optional[str]:
     """Devuelve ruta local al PDF; descarga de Drive si no existe localmente."""
-    local = os.path.join("uploads", factura.nombre_archivo)
+    local = os.path.join("/tmp", factura.nombre_archivo)
     if os.path.exists(local):
         return local
     if factura.drive_file_id:

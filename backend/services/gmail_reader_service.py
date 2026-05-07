@@ -11,7 +11,7 @@ from repositories import cliente_repo, factura_repo, proveedor_repo
 from services import google_auth_service
 from utils.logger import logger
 
-_UPLOADS = "uploads"
+_UPLOADS = "/tmp"
 _SYSTEM_PROMPT = "Eres un extractor de datos de facturas. Devuelve ÚNICAMENTE un JSON válido con estos campos: numero_factura (str), fecha_factura (str DD/MM/YYYY), monto_total (float), cuit_cliente (str solo números sin guiones), nombre_proveedor (str). Usa null para los campos que no puedas extraer. Sin texto adicional fuera del JSON."
 
 

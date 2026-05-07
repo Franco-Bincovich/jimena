@@ -103,7 +103,7 @@ def eliminar(db: Session, factura_id: str) -> None:
     factura = factura_repo.find_by_id(db, factura_id)
     if not factura:
         raise AppError("Factura no encontrada", "FACTURA_NOT_FOUND", 404)
-    pdf_path = os.path.join("uploads", factura.nombre_archivo)
+    pdf_path = os.path.join("/tmp", factura.nombre_archivo)
     nombre_archivo = factura.nombre_archivo
     factura_repo.delete(db, factura_id)
     if os.path.exists(pdf_path):

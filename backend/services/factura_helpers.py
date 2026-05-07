@@ -42,7 +42,7 @@ def intentar_subida_drive(factura_id: str, nombre_archivo: str, nombre_proveedor
     """Sube el PDF a Drive (best-effort). Si falla, loguea el error y continúa."""
     try:
         from services import drive_service  # lazy — evita importación circular
-        pdf_path = os.path.join("uploads", nombre_archivo)
+        pdf_path = os.path.join("/tmp", nombre_archivo)
         resultado = drive_service.subir_factura_proveedor(pdf_path, nombre_proveedor, nombre_archivo, db)
         factura_repo.update(db, factura_id, {
             "drive_file_id": resultado["file_id"],
