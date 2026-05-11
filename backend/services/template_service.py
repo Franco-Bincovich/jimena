@@ -92,13 +92,23 @@ def resolver_variables_envio(
 
     dm = datos_manuales
     fecha = factura.fecha_factura
+
+    if fecha_desde_override:
+        try:
+            y, m, _ = fecha_desde_override.split("-")
+            mes_override, anio_override = MESES[int(m) - 1], y
+        except (ValueError, IndexError):
+            mes_override = anio_override = None
+    else:
+        mes_override = anio_override = None
+
     variables = {
         "nombre_destinatario": cliente.nombre,
         "cliente": cliente.nombre,
         "empresa_remitente": config.empresa_nombre if config and config.empresa_nombre else "",
         "proveedor": (factura.proveedor.nombre if factura.proveedor else "") or (dm.proveedor or "" if dm else ""),
-        "mes": (MESES[fecha.month - 1] if fecha else "") or (dm.mes or "" if dm else ""),
-        "año": (str(fecha.year) if fecha else "") or (dm.anio or "" if dm else ""),
+        "mes": mes_override or (MESES[fecha.month - 1] if fecha else "") or (dm.mes or "" if dm else ""),
+        "año": anio_override or (str(fecha.year) if fecha else "") or (dm.anio or "" if dm else ""),
         "numero_factura": (factura.numero_factura or "") or (dm.numero_factura or "" if dm else ""),
         "fecha_factura": formatear_fecha(fecha) if fecha else "",
         "fecha_desde": formatear_fecha_iso(fecha_desde_override) if fecha_desde_override else (formatear_fecha(factura.fecha_desde) if factura.fecha_desde else "") or (formatear_fecha_iso(dm.fecha_desde) if dm and dm.fecha_desde else ""),
