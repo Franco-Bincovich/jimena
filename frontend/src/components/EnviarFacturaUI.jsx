@@ -73,22 +73,30 @@ export function ClientesEnvioSection({
         <div className="flex flex-col gap-2">
           {clienteItems.map((item, i) => {
             const disponibles = clientes.filter((c) => !clientesUsados.includes(c.id) || c.id === item.clienteId)
+            const clienteSeleccionado = clientes.find((c) => c.id === item.clienteId)
             return (
-              <div key={i} className="flex items-center gap-2">
-                <div className="flex-1 min-w-0">
-                  <select value={item.clienteId} onChange={(e) => setClienteField(i, 'clienteId', e.target.value)}>
-                    <option value="">Seleccioná un cliente</option>
-                    {disponibles.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                  </select>
+              <div key={i} className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <select value={item.clienteId} onChange={(e) => setClienteField(i, 'clienteId', e.target.value)}>
+                      <option value="">Seleccioná un cliente</option>
+                      {disponibles.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ width: '130px', flexShrink: 0 }}>
+                    <input type="number" min="0" step="0.01" value={item.monto} onChange={(e) => setClienteField(i, 'monto', e.target.value)} placeholder="Monto" />
+                  </div>
+                  <button type="button" onClick={() => removeCliente(i)} disabled={clienteItems.length === 1} className="p-2 text-muted hover:text-error transition-colors disabled:opacity-30 flex-shrink-0" title="Eliminar cliente">
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M1.5 1.5l10 10M11.5 1.5l-10 10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    </svg>
+                  </button>
                 </div>
-                <div style={{ width: '130px', flexShrink: 0 }}>
-                  <input type="number" min="0" step="0.01" value={item.monto} onChange={(e) => setClienteField(i, 'monto', e.target.value)} placeholder="Monto" />
-                </div>
-                <button type="button" onClick={() => removeCliente(i)} disabled={clienteItems.length === 1} className="p-2 text-muted hover:text-error transition-colors disabled:opacity-30 flex-shrink-0" title="Eliminar cliente">
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                    <path d="M1.5 1.5l10 10M11.5 1.5l-10 10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                  </svg>
-                </button>
+                {item.clienteId && (
+                  clienteSeleccionado?.email
+                    ? <p className="text-[11px] pl-0.5" style={{ color: 'var(--c-muted)' }}>{clienteSeleccionado.email}</p>
+                    : <p className="text-[11px] pl-0.5" style={{ color: 'var(--c-warn-text)' }}>Sin email registrado</p>
+                )}
               </div>
             )
           })}
