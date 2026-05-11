@@ -14,14 +14,14 @@ _UPLOADS = "/tmp"
 _SYSTEM_PROMPT = "Eres un extractor de datos de facturas. Devuelve ÚNICAMENTE un JSON válido con estos campos: numero_factura (str), fecha_factura (str DD/MM/YYYY), monto_total (float), cuit_cliente (str solo números sin guiones), nombre_proveedor (str). Usa null para los campos que no puedas extraer. Sin texto adicional fuera del JSON."
 
 
-def _encontrar_adjunto_pdf(parts: list) -> Optional[dict]:
+def _encontrar_adjuntos_pdf(parts: list) -> list[dict]:
+    """Devuelve todos los adjuntos PDF encontrados recursivamente en las partes del mensaje."""
+    encontrados = []
     for p in parts:
         if p.get("filename", "").lower().endswith(".pdf") and p.get("body", {}).get("attachmentId"):
-            return p
-        found = _encontrar_adjunto_pdf(p.get("parts", []))
-        if found:
-            return found
-    return None
+            encontrados.append(p)
+        encontrados.extend(_encontrar_adjuntos_pdf(p.get("parts", [])))
+    return encontrados
 
 
 def buscar_facturas_nuevas(db: Session) -> list[dict]:
@@ -41,15 +41,15 @@ def buscar_facturas_nuevas(db: Session) -> list[dict]:
     if not emails_prov:
         return []
 
-    query = f"({' OR '.join(f'from:{e}' for e in emails_prov)}) has:attachment filename:pdf after:{(datetime.now() - timedelta(days=60)).strftime('%Y/%m/%d')}"
+    query = f"({' OR '.join(f'from:{e}' for e in emails_prov)}) has:attachment filename:pdf after:{(datetime.now() - timedelta(days=30)).strftime('%Y/%m/%d')}"
     msgs = service.users().messages().list(userId="me", q=query).execute().get("messages", [])
 
     detectadas = []
     for msg in msgs:
         try:
-            info = _procesar_mensaje(service, msg["id"], emails_prov, db)
-            if info:
-                detectadas.append(info)
+            infos = _procesar_mensaje(service, msg["id"], emails_prov, db)
+            if infos:
+                detectadas.extend(infos)
         except Exception as exc:
             logger.error("Error al procesar mensaje Gmail", extra={"message_id": msg["id"], "error": str(exc)})
     return detectadas
@@ -57,14 +57,7 @@ def buscar_facturas_nuevas(db: Session) -> list[dict]:
 
 def _procesar_mensaje(
     service, message_id: str, emails_prov: dict, db: Session
-) -> Optional[dict]:
-    existing = factura_repo.find_by_gmail_message_id(db, message_id)
-    if existing and (existing.estado == "confirmada" or
-                     (existing.numero_factura and existing.monto_total)):
-        return None
-    if existing:
-        factura_repo.delete(db, existing.id)
-
+) -> Optional[list[dict]]:
     msg = service.users().messages().get(userId="me", id=message_id, format="full").execute()
     fecha_mail = datetime.fromtimestamp(
         int(msg["internalDate"]) / 1000, tz=timezone.utc
@@ -77,57 +70,73 @@ def _procesar_mensaje(
     if not proveedor:
         return None
 
-    adjunto = _encontrar_adjunto_pdf(msg.get("payload", {}).get("parts", []))
-    if not adjunto:
+    adjuntos = _encontrar_adjuntos_pdf(msg.get("payload", {}).get("parts", []))
+    if not adjuntos:
         return None
 
-    data = service.users().messages().attachments().get(
-        userId="me", messageId=message_id, id=adjunto["body"]["attachmentId"]
-    ).execute()
-    pdf_bytes = base64.urlsafe_b64decode(data["data"])
-    filename = adjunto["filename"]
-    stored_name = f"{message_id}_{filename}"
     os.makedirs(_UPLOADS, exist_ok=True)
-    pdf_path = os.path.join(_UPLOADS, stored_name)
-    with open(pdf_path, "wb") as f:
-        f.write(pdf_bytes)
+    detectadas = []
+    for adjunto in adjuntos:
+        filename = adjunto["filename"]
+        stored_name = f"{message_id}_{filename}"
 
-    datos = extraer_datos_factura(pdf_path)
-    cuit = datos.get("cuit_cliente")
-    cliente = cliente_repo.find_by_cuit(db, cuit) if cuit else None
+        existing = factura_repo.find_by_nombre_archivo(db, stored_name)
+        if existing and (existing.estado == "confirmada" or
+                         (existing.numero_factura and existing.monto_total)):
+            continue
+        if existing:
+            factura_repo.delete(db, existing.id)
 
-    fecha_str = datos.get("fecha_factura") or fecha_mail
-    fecha_factura = None
-    if fecha_str and isinstance(fecha_str, str):
         try:
-            fecha_factura = datetime.strptime(fecha_str, "%d/%m/%Y").date()
-        except ValueError:
+            data = service.users().messages().attachments().get(
+                userId="me", messageId=message_id, id=adjunto["body"]["attachmentId"]
+            ).execute()
+            pdf_bytes = base64.urlsafe_b64decode(data["data"])
+            pdf_path = os.path.join(_UPLOADS, stored_name)
+            with open(pdf_path, "wb") as f:
+                f.write(pdf_bytes)
+        except Exception as exc:
+            logger.error("Error descargando adjunto", extra={"archivo": stored_name, "error": str(exc)})
+            continue
+
+        datos = extraer_datos_factura(pdf_path)
+        cuit = datos.get("cuit_cliente")
+        cliente = cliente_repo.find_by_cuit(db, cuit) if cuit else None
+
+        fecha_str = datos.get("fecha_factura") or fecha_mail
+        fecha_factura = None
+        if fecha_str and isinstance(fecha_str, str):
             try:
-                fecha_factura = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+                fecha_factura = datetime.strptime(fecha_str, "%d/%m/%Y").date()
             except ValueError:
-                fecha_factura = None
+                try:
+                    fecha_factura = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+                except ValueError:
+                    fecha_factura = None
 
-    factura = factura_repo.create(db, {
-        "nombre_archivo": stored_name,
-        "proveedor_id": proveedor.id,
-        "gmail_message_id": message_id,
-        "numero_factura": datos.get("numero_factura"),
-        "fecha_factura": fecha_factura,
-        "monto_total": datos.get("monto_total"),
-        "estado": "pendiente_confirmacion",
-    })
-    if cliente:
-        factura_repo.create_cliente_asociado(db, factura.id, cliente.id)
+        factura = factura_repo.create(db, {
+            "nombre_archivo": stored_name,
+            "proveedor_id": proveedor.id,
+            "gmail_message_id": message_id,
+            "numero_factura": datos.get("numero_factura"),
+            "fecha_factura": fecha_factura,
+            "monto_total": datos.get("monto_total"),
+            "estado": "pendiente_confirmacion",
+        })
+        if cliente:
+            factura_repo.create_cliente_asociado(db, factura.id, cliente.id)
 
-    try:
-        from services import storage_service  # lazy — evita importación circular
-        storage_url = storage_service.subir_pdf(pdf_path, stored_name)
-        factura_repo.update(db, factura.id, {"drive_url": storage_url})
-    except Exception as exc:
-        logger.error("Error subiendo PDF a Supabase Storage", extra={"archivo": stored_name, "error": str(exc)})
+        try:
+            from services import storage_service  # lazy — evita importación circular
+            storage_url = storage_service.subir_pdf(pdf_path, stored_name)
+            factura_repo.update(db, factura.id, {"drive_url": storage_url})
+        except Exception as exc:
+            logger.error("Error subiendo PDF a Supabase Storage", extra={"archivo": stored_name, "error": str(exc)})
 
-    logger.info("Factura detectada", extra={"proveedor": proveedor.nombre, "message_id": message_id})
-    return {"factura_id": factura.id, "proveedor": proveedor.nombre, "archivo": stored_name}
+        logger.info("Factura detectada", extra={"proveedor": proveedor.nombre, "archivo": stored_name})
+        detectadas.append({"factura_id": factura.id, "proveedor": proveedor.nombre, "archivo": stored_name})
+
+    return detectadas or None
 
 
 def extraer_datos_factura(pdf_path: str) -> dict:

@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -42,13 +41,15 @@ def resolver_clientes(clientes_input: list, db: Session) -> List[ClienteConMonto
 
 
 def obtener_pdf_path(factura, db: Session) -> Optional[str]:
-    """Devuelve ruta local al PDF; descarga de Drive si no existe localmente."""
-    local = os.path.join("/tmp", factura.nombre_archivo)
-    if os.path.exists(local):
-        return local
-    if factura.drive_file_id:
-        from services import drive_service  # lazy — evita importación circular
-        return drive_service.descargar_pdf(factura.drive_file_id, factura.nombre_archivo, db)
+    """Descarga el PDF desde Supabase Storage (drive_url) a /tmp y devuelve la ruta local."""
+    if factura.drive_url:
+        import requests
+        response = requests.get(factura.drive_url)
+        if response.status_code == 200:
+            path = f"/tmp/{factura.nombre_archivo}"
+            with open(path, "wb") as f:
+                f.write(response.content)
+            return path
     return None
 
 

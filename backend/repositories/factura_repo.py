@@ -30,6 +30,10 @@ def find_by_gmail_message_id(db: Session, gmail_message_id: str) -> Optional[Fac
     )
 
 
+def find_by_nombre_archivo(db: Session, nombre_archivo: str) -> Optional[Factura]:
+    return db.query(Factura).filter(Factura.nombre_archivo == nombre_archivo).first()
+
+
 def create(db: Session, fields: dict) -> Factura:
     factura = Factura(**fields)
     db.add(factura)
