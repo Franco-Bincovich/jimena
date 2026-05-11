@@ -17,7 +17,7 @@ export default function EnviarFactura() {
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
     datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
     cc, setCC, previewOpen, setPreviewOpen, sending, Toast,
-    facturaSeleccionada, facturasConfirmadas, clientesValidos, clientesUsados,
+    facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,
   } = useEnviarFactura()
 
@@ -37,7 +37,7 @@ export default function EnviarFactura() {
         <ClientesEnvioSection
           facturaId={facturaId} setFacturaId={setFacturaId}
           plantillaId={plantillaId} setPlantillaId={setPlantillaId}
-          facturasConfirmadas={facturasConfirmadas} plantillas={plantillas}
+          facturasDisponibles={facturasDisponibles} plantillas={plantillas}
           facturaSeleccionada={facturaSeleccionada}
           clienteItems={clienteItems} clientes={clientes}
           clientesUsados={clientesUsados} setClienteField={setClienteField}

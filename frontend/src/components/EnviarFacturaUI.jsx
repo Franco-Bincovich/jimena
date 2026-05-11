@@ -25,7 +25,7 @@ export function EnviarSkeletonLoader() {
 
 export function ClientesEnvioSection({
   facturaId, setFacturaId, plantillaId, setPlantillaId,
-  facturasConfirmadas, plantillas, facturaSeleccionada,
+  facturasDisponibles, plantillas, facturaSeleccionada,
   clienteItems, clientes, clientesUsados, setClienteField,
   addCliente, removeCliente, clientesValidos, primerCliente,
 }) {
@@ -36,7 +36,7 @@ export function ClientesEnvioSection({
         <FormField label="Factura">
           <select value={facturaId} onChange={(e) => setFacturaId(e.target.value)}>
             <option value="">Sin factura (completar manualmente)</option>
-            {facturasConfirmadas.map((f) => (
+            {facturasDisponibles.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.numero_factura ? `${f.numero_factura} — ${f.proveedor?.nombre || f.nombre_archivo}` : f.nombre_archivo}
               </option>

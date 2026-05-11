@@ -29,7 +29,7 @@ export function useEnviarFactura() {
   const { showToast, Toast } = useToast()
 
   const facturaSeleccionada = facturas.find((f) => f.id === facturaId)
-  const facturasConfirmadas = facturas.filter((f) => f.estado === 'confirmada')
+  const facturasDisponibles = facturas.filter((f) => f.estado === 'pendiente_confirmacion' || f.estado === 'confirmada')
   const clientesValidos = clienteItems.filter((ci) => !!ci.clienteId)
   const clientesUsados = clienteItems.map((ci) => ci.clienteId).filter(Boolean)
   const primerCliente = clientes.find((c) => c.id === clienteItems[0]?.clienteId)
@@ -95,9 +95,6 @@ export function useEnviarFactura() {
     if (!plantillaId) return showToast('Seleccioná una plantilla', 'error')
     if (!asunto.trim()) return showToast('El asunto no puede estar vacío', 'error')
     if (!cuerpo.trim()) return showToast('El cuerpo no puede estar vacío', 'error')
-    if (facturaSeleccionada && facturaSeleccionada.estado !== 'confirmada') {
-      return showToast('Solo se pueden enviar facturas confirmadas', 'error')
-    }
     setSending(true)
     try {
       const payload = {
@@ -127,7 +124,7 @@ export function useEnviarFactura() {
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
     datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
     cc, setCC, previewOpen, setPreviewOpen, sending, Toast,
-    facturaSeleccionada, facturasConfirmadas, clientesValidos, clientesUsados,
+    facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,
   }
 }

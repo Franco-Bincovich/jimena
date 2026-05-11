@@ -16,7 +16,7 @@ def preview(
     """
     Construye el email sin enviarlo.
     Si factura_id es None, usa una factura vacía y omite validaciones de estado.
-    Si factura_id está presente, valida que existe y estado == 'confirmada'.
+    Si factura_id está presente, valida que existe (cualquier estado salvo descartada).
     Valida plantilla (tipo == 'envio') y todos los clientes.
     El primer item es el destinatario principal.
 
@@ -31,8 +31,6 @@ def preview(
         factura = factura_repo.find_by_id(db, factura_id)
         if not factura:
             raise AppError("Factura no encontrada", "FACTURA_NOT_FOUND", 404)
-        if factura.estado != "confirmada":
-            raise AppError("La factura no está confirmada", "FACTURA_NOT_CONFIRMADA", 400)
     else:
         factura = FacturaVacia()
 
