@@ -24,6 +24,8 @@ class EnvioPreviewRequest(BaseModel):
     factura_id: Optional[UUID] = None
     plantilla_id: UUID
     clientes: List[ClienteEnvioItem] = Field(min_length=1)
+    fecha_desde: Optional[str] = None  # YYYY-MM-DD, override para {{fecha_desde}}
+    fecha_hasta: Optional[str] = None  # YYYY-MM-DD, override para {{fecha_hasta}}
     datos_manuales: Optional[DatosManuales] = None
 
 

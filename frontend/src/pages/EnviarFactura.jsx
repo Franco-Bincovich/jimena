@@ -15,6 +15,7 @@ export default function EnviarFactura() {
   const {
     clientes, plantillas, proveedores, googleConnected, loadingInit,
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
+    fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
     datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
     cc, setCC, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
@@ -38,6 +39,8 @@ export default function EnviarFactura() {
           facturaId={facturaId} setFacturaId={setFacturaId}
           plantillaId={plantillaId} setPlantillaId={setPlantillaId}
           facturasDisponibles={facturasDisponibles} plantillas={plantillas}
+          fechaDesde={fechaDesde} setFechaDesde={setFechaDesde}
+          fechaHasta={fechaHasta} setFechaHasta={setFechaHasta}
           facturaSeleccionada={facturaSeleccionada}
           clienteItems={clienteItems} clientes={clientes}
           clientesUsados={clientesUsados} setClienteField={setClienteField}

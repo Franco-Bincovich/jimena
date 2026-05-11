@@ -11,7 +11,8 @@ from utils.logger import logger
 
 def preview(
     factura_id: Optional[str], clientes_input: list, plantilla_id: str,
-    db: Session, datos_manuales=None,
+    db: Session, fecha_desde: Optional[str] = None, fecha_hasta: Optional[str] = None,
+    datos_manuales=None,
 ) -> dict:
     """
     Construye el email sin enviarlo.
@@ -45,7 +46,8 @@ def preview(
 
     config = google_config_repo.find(db)
     resuelto = template_service.resolver_variables_envio(
-        plantilla, cliente_principal, factura, items, config, datos_manuales
+        plantilla, cliente_principal, factura, items, config, datos_manuales,
+        fecha_desde_override=fecha_desde, fecha_hasta_override=fecha_hasta,
     )
     return {
         "asunto": resuelto["asunto"],
@@ -62,7 +64,8 @@ def preview(
 def enviar(
     factura_id: Optional[str], clientes_input: list, plantilla_id: str,
     asunto_override: Optional[str], cuerpo_override: Optional[str],
-    cc: list, db: Session, datos_manuales=None,
+    cc: list, db: Session, fecha_desde: Optional[str] = None, fecha_hasta: Optional[str] = None,
+    datos_manuales=None,
 ) -> dict:
     """
     Flujo completo de envío a cliente.
@@ -78,7 +81,7 @@ def enviar(
     Returns:
         {historial_id, gmail_message_id}.
     """
-    vista = preview(factura_id, clientes_input, plantilla_id, db, datos_manuales)
+    vista = preview(factura_id, clientes_input, plantilla_id, db, fecha_desde, fecha_hasta, datos_manuales)
     asunto = asunto_override or vista["asunto"]
     cuerpo = cuerpo_override or vista["cuerpo"]
     cliente_principal = cliente_repo.find_by_id(db, str(clientes_input[0].cliente_id))

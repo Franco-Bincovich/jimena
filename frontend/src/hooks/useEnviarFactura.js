@@ -23,6 +23,8 @@ export function useEnviarFactura() {
   })
   const [asunto, setAsunto] = useState('')
   const [cuerpo, setCuerpo] = useState('')
+  const [fechaDesde, setFechaDesde] = useState('')
+  const [fechaHasta, setFechaHasta] = useState('')
   const [cc, setCC] = useState([])
   const [previewOpen, setPreviewOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -54,6 +56,8 @@ export function useEnviarFactura() {
       cliente_id: ci.clienteId,
       monto: ci.monto ? parseFloat(ci.monto) : null,
     })),
+    fecha_desde: fechaDesde || null,
+    fecha_hasta: fechaHasta || null,
     datos_manuales: datosManualesPayload,
   }
 
@@ -104,6 +108,8 @@ export function useEnviarFactura() {
           cliente_id: ci.clienteId,
           monto: ci.monto ? parseFloat(ci.monto) : null,
         })),
+        fecha_desde: fechaDesde || null,
+        fecha_hasta: fechaHasta || null,
         asunto,
         cuerpo,
         cc,
@@ -122,6 +128,7 @@ export function useEnviarFactura() {
   return {
     clientes, plantillas, proveedores, googleConnected, loadingInit,
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
+    fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
     datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
     cc, setCC, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,

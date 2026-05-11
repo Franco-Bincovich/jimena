@@ -26,6 +26,7 @@ export function EnviarSkeletonLoader() {
 export function ClientesEnvioSection({
   facturaId, setFacturaId, plantillaId, setPlantillaId,
   facturasDisponibles, plantillas, facturaSeleccionada,
+  fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
   clienteItems, clientes, clientesUsados, setClienteField,
   addCliente, removeCliente, clientesValidos, primerCliente,
 }) {
@@ -48,6 +49,12 @@ export function ClientesEnvioSection({
             <option value="">Seleccioná una plantilla</option>
             {plantillas.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
+        </FormField>
+        <FormField label="Fecha desde">
+          <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} />
+        </FormField>
+        <FormField label="Fecha hasta">
+          <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
         </FormField>
       </div>
       {facturaSeleccionada && (

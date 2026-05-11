@@ -19,6 +19,8 @@ async def preview_envio(data: EnvioPreviewRequest, db: Session = Depends(get_db)
         clientes_input=data.clientes,
         plantilla_id=str(data.plantilla_id),
         db=db,
+        fecha_desde=data.fecha_desde,
+        fecha_hasta=data.fecha_hasta,
         datos_manuales=data.datos_manuales,
     )
 
@@ -34,6 +36,8 @@ async def enviar_factura(data: EnvioEnviarRequest, db: Session = Depends(get_db)
         cuerpo_override=data.cuerpo_override,
         cc=data.cc,
         db=db,
+        fecha_desde=data.fecha_desde,
+        fecha_hasta=data.fecha_hasta,
         datos_manuales=data.datos_manuales,
     )
 

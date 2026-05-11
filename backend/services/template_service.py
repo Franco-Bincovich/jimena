@@ -59,6 +59,8 @@ def resolver_variables_envio(
     todos_clientes_con_monto: list,
     config=None,
     datos_manuales=None,
+    fecha_desde_override: str = None,
+    fecha_hasta_override: str = None,
 ) -> dict:
     """
     Resuelve las variables de una plantilla de tipo 'envio'.
@@ -99,8 +101,8 @@ def resolver_variables_envio(
         "año": (str(fecha.year) if fecha else "") or (dm.anio or "" if dm else ""),
         "numero_factura": (factura.numero_factura or "") or (dm.numero_factura or "" if dm else ""),
         "fecha_factura": formatear_fecha(fecha) if fecha else "",
-        "fecha_desde": (formatear_fecha(factura.fecha_desde) if factura.fecha_desde else "") or (formatear_fecha_iso(dm.fecha_desde) if dm and dm.fecha_desde else ""),
-        "fecha_hasta": (formatear_fecha(factura.fecha_hasta) if factura.fecha_hasta else "") or (formatear_fecha_iso(dm.fecha_hasta) if dm and dm.fecha_hasta else ""),
+        "fecha_desde": formatear_fecha_iso(fecha_desde_override) if fecha_desde_override else (formatear_fecha(factura.fecha_desde) if factura.fecha_desde else "") or (formatear_fecha_iso(dm.fecha_desde) if dm and dm.fecha_desde else ""),
+        "fecha_hasta": formatear_fecha_iso(fecha_hasta_override) if fecha_hasta_override else (formatear_fecha(factura.fecha_hasta) if factura.fecha_hasta else "") or (formatear_fecha_iso(dm.fecha_hasta) if dm and dm.fecha_hasta else ""),
         "monto_total": (formatear_monto(factura.monto_total) if factura.monto_total else "") or (formatear_monto(dm.monto_total) if dm and dm.monto_total else ""),
         "clientes_con_montos": bloque_clientes_con_montos,
     }
