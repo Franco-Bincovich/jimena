@@ -70,11 +70,9 @@ def create(db: Session, data: ClienteCreate) -> Cliente:
     Returns:
         Cliente creado.
 
-    Raises:
-        AppError: code 'DUPLICATE_EMAIL' si el email ya existe.
+    Returns:
+        Cliente creado.
     """
-    if data.email and cliente_repo.find_by_email(db, data.email):
-        raise AppError("El email ya está registrado", "DUPLICATE_EMAIL", 409)
     return cliente_repo.create(db, data)
 
 
@@ -92,13 +90,8 @@ def update(db: Session, cliente_id: str, data: ClienteUpdate) -> Cliente:
 
     Raises:
         AppError: code 'CLIENTE_NOT_FOUND' si el cliente no existe.
-        AppError: code 'DUPLICATE_EMAIL' si el email pertenece a otro cliente.
     """
     get_by_id(db, cliente_id)
-    if "email" in data.model_fields_set and data.email:
-        existing = cliente_repo.find_by_email(db, data.email)
-        if existing and existing.id != cliente_id:
-            raise AppError("El email ya está registrado", "DUPLICATE_EMAIL", 409)
     return cliente_repo.update(db, cliente_id, data)
 
 

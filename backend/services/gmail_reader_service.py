@@ -37,7 +37,13 @@ def buscar_facturas_nuevas(db: Session) -> list[dict]:
     service = build("gmail", "v1", credentials=credentials)
 
     proveedores = proveedor_repo.find_all(db)
-    emails_prov = {p.email.lower(): p for p in proveedores if p.email}
+    emails_prov = {}
+    for p in proveedores:
+        if p.email:
+            for addr in p.email.split(","):
+                addr = addr.strip().lower()
+                if addr:
+                    emails_prov[addr] = p
     if not emails_prov:
         return []
 

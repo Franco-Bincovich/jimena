@@ -8,8 +8,8 @@ export default function ProveedorModal({ open, saving, editItem, form, set, onCl
         <FormField label="Nombre" required>
           <input value={form.nombre} onChange={set('nombre')} placeholder="Ej: Acme S.A." required />
         </FormField>
-        <FormField label="Email" required>
-          <input type="email" value={form.email} onChange={set('email')} placeholder="contacto@empresa.com" required />
+        <FormField label="Email" required helper="Podés ingresar varios emails separados por coma">
+          <textarea rows={2} value={form.email} onChange={set('email')} placeholder="contacto@empresa.com, otro@empresa.com" required style={{ resize: 'none' }} />
         </FormField>
         <FormField label="CUIT">
           <input value={form.cuit} onChange={set('cuit')} placeholder="30-71884542-0" />
