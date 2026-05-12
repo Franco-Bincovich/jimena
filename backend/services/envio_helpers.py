@@ -42,24 +42,20 @@ def resolver_clientes(clientes_input: list, db: Session) -> List[ClienteConMonto
 
 
 def obtener_pdf_path(factura, db: Session) -> Optional[str]:
-    """Descarga el PDF desde Supabase Storage (drive_url) a /tmp y devuelve la ruta local."""
-    if factura.drive_url:
-        import requests
-        url = factura.drive_url.rstrip("?")
-        try:
-            response = requests.get(url, timeout=10)
-            if response.status_code == 200:
-                path = f"/tmp/{factura.nombre_archivo}"
-                with open(path, "wb") as f:
-                    f.write(response.content)
-                return path
-            else:
-                logger.error("Error descargando PDF de Storage",
-                    extra={"url": url, "status": response.status_code})
-        except Exception as exc:
-            logger.error("Excepción descargando PDF de Storage",
-                extra={"url": url, "error": str(exc)})
-    return None
+    """Descarga el PDF desde Supabase Storage usando el SDK (no requiere bucket público)."""
+    if not factura.nombre_archivo:
+        return None
+    try:
+        from services import storage_service  # lazy — evita importación circular
+        pdf_bytes = storage_service.descargar_pdf(factura.nombre_archivo)
+        path = f"/tmp/{factura.nombre_archivo}"
+        with open(path, "wb") as f:
+            f.write(pdf_bytes)
+        return path
+    except Exception as exc:
+        logger.error("Error descargando PDF de Supabase Storage",
+            extra={"archivo": factura.nombre_archivo, "error": str(exc)})
+        return None
 
 
 def registrar_historial(
