@@ -38,7 +38,7 @@ def subir_pdf(file_path: str, nombre_destino: str) -> str:
             nombre_destino, pdf_bytes, {"content-type": "application/pdf"}
         )
 
-    url = client.storage.from_(BUCKET).get_public_url(nombre_destino)
+    url = client.storage.from_(BUCKET).get_public_url(nombre_destino).rstrip("?")
 
     if os.path.exists(file_path):
         os.remove(file_path)

@@ -58,7 +58,7 @@ def intentar_url_supabase(factura_id: str, nombre_archivo: str, db) -> None:
     try:
         from services import storage_service  # lazy — evita importación circular
         client = storage_service.get_supabase_client()
-        url = client.storage.from_("Facturas").get_public_url(nombre_archivo)
+        url = client.storage.from_("Facturas").get_public_url(nombre_archivo).rstrip("?")
         factura_repo.update(db, factura_id, {"drive_url": url})
     except Exception as exc:
         logger.error("Error obteniendo URL de Supabase Storage", extra={"factura_id": factura_id, "error": str(exc)})

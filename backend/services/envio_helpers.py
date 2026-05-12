@@ -45,8 +45,9 @@ def obtener_pdf_path(factura, db: Session) -> Optional[str]:
     """Descarga el PDF desde Supabase Storage (drive_url) a /tmp y devuelve la ruta local."""
     if factura.drive_url:
         import requests
+        url = factura.drive_url.rstrip("?")
         try:
-            response = requests.get(factura.drive_url, timeout=10)
+            response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 path = f"/tmp/{factura.nombre_archivo}"
                 with open(path, "wb") as f:
@@ -54,10 +55,10 @@ def obtener_pdf_path(factura, db: Session) -> Optional[str]:
                 return path
             else:
                 logger.error("Error descargando PDF de Storage",
-                    extra={"url": factura.drive_url, "status": response.status_code})
+                    extra={"url": url, "status": response.status_code})
         except Exception as exc:
             logger.error("Excepción descargando PDF de Storage",
-                extra={"url": factura.drive_url, "error": str(exc)})
+                extra={"url": url, "error": str(exc)})
     return None
 
 
