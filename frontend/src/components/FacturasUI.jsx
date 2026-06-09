@@ -158,7 +158,7 @@ export function FacturasTodasTab({ loading, todas, setDeleteModal }) {
             <tr><td colSpan={7} className="px-4 py-12 text-center text-muted text-[12.5px]">No hay facturas cargadas todavía</td></tr>
           ) : todas.map((f) => (
             <tr key={f.id} className="hover:bg-surface-hover transition-colors" style={{ borderTop: '0.5px solid var(--c-border)' }}>
-              <td className="px-3 py-3"><code className="text-primary text-[11.5px]">{f.nombre_archivo}</code></td>
+              <td className="px-3 py-3"><code className="text-primary text-[11.5px]">{f.nombre_archivo?.includes('_') ? f.nombre_archivo.slice(f.nombre_archivo.indexOf('_') + 1) : f.nombre_archivo}</code></td>
               <td className="px-3 py-3 text-muted text-[12px]">{f.proveedor?.nombre || '—'}</td>
               <td className="px-3 py-3 text-muted text-[12px] font-mono">{f.numero_factura || '—'}</td>
               <td className="px-3 py-3 text-muted text-[12px] whitespace-nowrap">{fmtFecha(f.fecha_factura)}</td>

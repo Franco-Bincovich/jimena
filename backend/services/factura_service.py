@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
@@ -129,7 +128,7 @@ def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
     Returns:
         Dict con factura_id, numero_factura, fecha_factura, monto_total, nombre_proveedor.
     """
-    stored_name = f"{uuid4().hex}_{filename}"
+    stored_name = filename
     pdf_path = os.path.join("/tmp", stored_name)
     with open(pdf_path, "wb") as fh:
         fh.write(pdf_bytes)
