@@ -65,7 +65,7 @@ def enviar(
     factura_id: Optional[str], clientes_input: list, plantilla_id: str,
     asunto_override: Optional[str], cuerpo_override: Optional[str],
     cc: list, db: Session, fecha_desde: Optional[str] = None, fecha_hasta: Optional[str] = None,
-    datos_manuales=None,
+    datos_manuales=None, consumos: Optional[float] = None,
 ) -> dict:
     """
     Flujo completo de envío a cliente.
@@ -103,7 +103,7 @@ def enviar(
     if factura:
         drive_url = factura.drive_url or ""
         try:
-            sheets_writer_service.registrar_envio(factura, cliente_principal, drive_url, None, db)
+            sheets_writer_service.registrar_envio(factura, cliente_principal, drive_url, None, db, cc=cc, consumos=consumos)
         except Exception as exc:
             logger.error("Error en Sheets (best-effort)", extra={"factura_id": factura_id, "error": str(exc)})
 

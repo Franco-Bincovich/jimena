@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from models import HistorialEnvio, Pedido
 from repositories import cliente_repo, google_config_repo, pedido_repo, plantilla_repo, proveedor_repo
-from services import gmail_sender_service, sheets_writer_service, template_service
+from services import gmail_sender_service, template_service
 from utils.errors import AppError
 from utils.logger import logger
 
@@ -123,12 +123,6 @@ def enviar(
         for item in items:
             pedido_repo.create_item(db, pedido.id, str(item.cliente_id), item.consultas_api)
         pedido_repo.marcar_enviado(db, pedido.id, gmail_id)
-        try:
-            sheets_rows = sheets_writer_service.registrar_pedido(
-                pedido, pedido_repo.get_items(db, pedido.id), db
-            )
-        except Exception as exc:
-            logger.error("Error en Sheets (best-effort)", extra={"pedido_id": pedido.id, "error": str(exc)})
     else:
         pedido_repo.marcar_enviado(db, pedido.id, gmail_id)
         logger.info("Pedido reutilizado, items y Sheets omitidos", extra={"pedido_id": pedido.id})

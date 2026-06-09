@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from typing import Optional
 
 from googleapiclient.discovery import build
@@ -72,11 +73,12 @@ def registrar_pedido(pedido, items: list, db: Session) -> list[int]:
 
 
 def registrar_envio(
-    factura, cliente, drive_url: str, sheets_row: Optional[int], db: Session
+    factura, cliente, drive_url: str, sheets_row: Optional[int], db: Session,
+    cc: list[str] = [], consumos: float | None = None,
 ) -> None:
     """
-    Si sheets_row existe, actualiza F (numero_factura) e I (monto_total) en esa fila.
-    Si no hay sheets_row, agrega una fila nueva con columnas A-J.
+    Si sheets_row existe, actualiza C, F, I, J y K en esa fila.
+    Si no hay sheets_row, agrega una fila nueva con columnas A-K.
 
     Args:
         factura: Instancia de Factura con proveedor y fecha_factura cargados.
@@ -95,6 +97,8 @@ def registrar_envio(
     credentials = google_auth_service.get_credentials(db)
     service = build("sheets", "v4", credentials=credentials)
 
+    mes_anio = (date.today().replace(day=1) - timedelta(days=1)).strftime("%m/%Y")
+
     try:
         if sheets_row:
             service.spreadsheets().values().batchUpdate(
@@ -103,6 +107,14 @@ def registrar_envio(
                     "valueInputOption": "RAW",
                     "data": [
                         {
+                            "range": f"C{sheets_row}",
+                            "values": [[mes_anio]],
+                        },
+                        {
+                            "range": f"E{sheets_row}",
+                            "values": [[consumos if consumos is not None else ""]],
+                        },
+                        {
                             "range": f"F{sheets_row}",
                             "values": [[factura.numero_factura or ""]],
                         },
@@ -110,25 +122,32 @@ def registrar_envio(
                             "range": f"I{sheets_row}",
                             "values": [[factura.monto_total or ""]],
                         },
+                        {
+                            "range": f"J{sheets_row}",
+                            "values": [[date.today().strftime("%d/%m/%Y")]],
+                        },
+                        {
+                            "range": f"K{sheets_row}",
+                            "values": [["; ".join(filter(None, [cliente.email or "" if cliente else ""] + cc))]],
+                        },
                     ],
                 },
             ).execute()
         else:
             cli = cliente
-            fecha = factura.fecha_factura
-            mes_anio = fecha.strftime("%m/%Y") if hasattr(fecha, "strftime") else ""
             proveedor_nombre = factura.proveedor.nombre if factura.proveedor else ""
             fila = [
                 cli.nombre if cli else "",
                 cli.cuit or "" if cli else "",
                 mes_anio,
                 proveedor_nombre,
-                "",
+                consumos if consumos is not None else "",
                 factura.numero_factura or "",
                 "",
                 "",
                 factura.monto_total or "",
-                cli.email or "" if cli else "",
+                date.today().strftime("%d/%m/%Y"),
+                "; ".join(filter(None, [cli.email or "" if cli else ""] + cc)),
             ]
             service.spreadsheets().values().append(
                 spreadsheetId=config.sheet_id,

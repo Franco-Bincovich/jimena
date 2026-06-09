@@ -39,6 +39,7 @@ async def enviar_factura(data: EnvioEnviarRequest, db: Session = Depends(get_db)
         fecha_desde=data.fecha_desde,
         fecha_hasta=data.fecha_hasta,
         datos_manuales=data.datos_manuales,
+        consumos=data.consumos,
     )
 
 

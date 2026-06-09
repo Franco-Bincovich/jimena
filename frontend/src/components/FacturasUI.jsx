@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 export const EMPTY_FORM = {
@@ -75,6 +76,41 @@ export function TableSkeleton() {
       ))}
     </tr>
   ))
+}
+
+export function SubirManualSection({ uploading, onSubir }) {
+  const inputRef = useRef(null)
+
+  const handleChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) onSubir(file)
+    e.target.value = ''
+  }
+
+  return (
+    <div className="p-4 bg-surface rounded-lg mb-4" style={{ border: '0.5px solid var(--c-border)' }}>
+      <p className="text-text text-[13px] font-medium mb-1">Subir factura manualmente</p>
+      <p className="text-muted text-[12px] mb-4">Subí un PDF y el sistema extrae los datos automáticamente con IA.</p>
+      <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={handleChange} />
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-[12.5px] font-medium rounded-md transition-colors min-h-[40px]"
+      >
+        {uploading ? (
+          <><Spinner /> Procesando PDF...</>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 9V1M4 4l3-3 3 3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 10v1.5A1.5 1.5 0 003.5 13h7A1.5 1.5 0 0012 11.5V10" stroke="white" strokeWidth="1.1" strokeLinecap="round" />
+            </svg>
+            Subir factura en PDF
+          </>
+        )}
+      </button>
+    </div>
+  )
 }
 
 export function GmailBuscarSection({ googleConnected, searching, handleBuscar }) {

@@ -26,6 +26,7 @@ export function useEnviarFactura() {
   const [fechaDesde, setFechaDesde] = useState('')
   const [fechaHasta, setFechaHasta] = useState('')
   const [cc, setCC] = useState([])
+  const [consumos, setConsumos] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
   const [sending, setSending] = useState(false)
   const { showToast, Toast } = useToast()
@@ -113,6 +114,7 @@ export function useEnviarFactura() {
         asunto,
         cuerpo,
         cc,
+        consumos: consumos ? parseFloat(consumos) : null,
         datos_manuales: datosManualesPayload,
       }
       await api.post('/api/envios/enviar', payload)
@@ -130,7 +132,7 @@ export function useEnviarFactura() {
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
     fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
     datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
-    cc, setCC, previewOpen, setPreviewOpen, sending, Toast,
+    cc, setCC, consumos, setConsumos, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,
   }

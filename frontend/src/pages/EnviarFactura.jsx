@@ -17,7 +17,7 @@ export default function EnviarFactura() {
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
     fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
     datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
-    cc, setCC, previewOpen, setPreviewOpen, sending, Toast,
+    cc, setCC, consumos, setConsumos, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,
   } = useEnviarFactura()
@@ -41,6 +41,7 @@ export default function EnviarFactura() {
           facturasDisponibles={facturasDisponibles} plantillas={plantillas}
           fechaDesde={fechaDesde} setFechaDesde={setFechaDesde}
           fechaHasta={fechaHasta} setFechaHasta={setFechaHasta}
+          consumos={consumos} setConsumos={setConsumos}
           facturaSeleccionada={facturaSeleccionada}
           clienteItems={clienteItems} clientes={clientes}
           clientesUsados={clientesUsados} setClienteField={setClienteField}

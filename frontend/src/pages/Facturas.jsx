@@ -1,6 +1,6 @@
 import ConfirmDialog from '../components/ConfirmDialog'
 import FacturaConfirmModal from '../components/FacturaConfirmModal'
-import { CardSkeleton, fmtFecha, fmtMonto, FacturasTodasTab, GmailBuscarSection, PendienteBadge } from '../components/FacturasUI'
+import { CardSkeleton, fmtFecha, fmtMonto, FacturasTodasTab, GmailBuscarSection, PendienteBadge, SubirManualSection } from '../components/FacturasUI'
 import { useFacturas } from '../hooks/useFacturas'
 
 export default function Facturas() {
@@ -9,6 +9,7 @@ export default function Facturas() {
     proveedores, clientes, confirmModal, setConfirmModal, confirmForm, saving,
     deleteModal, setDeleteModal, Toast, handleBuscar,
     openConfirmar, toggleCliente, setField, handleConfirmar, handleDelete,
+    uploadingManual, handleSubirManual,
   } = useFacturas()
 
   return (
@@ -20,6 +21,7 @@ export default function Facturas() {
       </div>
 
       <GmailBuscarSection googleConnected={googleConnected} searching={searching} handleBuscar={handleBuscar} />
+      <SubirManualSection uploading={uploadingManual} onSubir={handleSubirManual} />
 
       <div>
         <div className="flex" style={{ borderBottom: '0.5px solid var(--c-border)' }}>

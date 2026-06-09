@@ -33,6 +33,7 @@ class EnvioEnviarRequest(EnvioPreviewRequest):
     asunto_override: Optional[str] = None
     cuerpo_override: Optional[str] = None
     cc: list[EmailStr] = []
+    consumos: Optional[float] = None
 
 
 class _ClienteOut(BaseModel):

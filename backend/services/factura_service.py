@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
@@ -113,3 +114,59 @@ def eliminar(db: Session, factura_id: str) -> None:
         storage_service.eliminar_pdf(nombre_archivo)
     except Exception as exc:
         logger.error("Error eliminando PDF de Supabase Storage", extra={"archivo": nombre_archivo, "error": str(exc)})
+
+
+def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
+    """
+    Crea una Factura a partir de un PDF subido manualmente.
+    Extrae datos con Claude Vision, persiste en DB y sube a Supabase Storage (best-effort).
+
+    Args:
+        db: Sesión de base de datos.
+        pdf_bytes: Contenido binario del PDF recibido por el endpoint.
+        filename: Nombre original del archivo subido.
+
+    Returns:
+        Dict con factura_id, numero_factura, fecha_factura, monto_total, nombre_proveedor.
+    """
+    stored_name = f"{uuid4().hex}_{filename}"
+    pdf_path = os.path.join("/tmp", stored_name)
+    with open(pdf_path, "wb") as fh:
+        fh.write(pdf_bytes)
+
+    from services import gmail_reader_service  # lazy — evita importación circular
+    datos = gmail_reader_service.extraer_datos_factura(pdf_path)
+
+    fecha_factura = None
+    fecha_str = datos.get("fecha_factura")
+    if fecha_str:
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+            try:
+                fecha_factura = datetime.strptime(fecha_str, fmt).date()
+                break
+            except ValueError:
+                continue
+
+    factura = factura_repo.create(db, {
+        "nombre_archivo": stored_name,
+        "numero_factura": datos.get("numero_factura"),
+        "fecha_factura": fecha_factura,
+        "monto_total": datos.get("monto_total"),
+        "estado": "pendiente_confirmacion",
+    })
+
+    try:
+        from services import storage_service  # lazy — evita importación circular
+        storage_url = storage_service.subir_pdf(pdf_path, stored_name)
+        factura_repo.update(db, str(factura.id), {"drive_url": storage_url})
+    except Exception as exc:
+        logger.error("Error subiendo PDF a Storage", extra={"archivo": stored_name, "error": str(exc)})
+
+    logger.info("Factura subida manualmente", extra={"factura_id": str(factura.id), "archivo": stored_name})
+    return {
+        "factura_id": str(factura.id),
+        "numero_factura": datos.get("numero_factura"),
+        "fecha_factura": datos.get("fecha_factura"),
+        "monto_total": datos.get("monto_total"),
+        "nombre_proveedor": datos.get("nombre_proveedor"),
+    }

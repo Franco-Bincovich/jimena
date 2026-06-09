@@ -27,6 +27,7 @@ export function ClientesEnvioSection({
   facturaId, setFacturaId, plantillaId, setPlantillaId,
   facturasDisponibles, plantillas, facturaSeleccionada,
   fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
+  consumos, setConsumos,
   clienteItems, clientes, clientesUsados, setClienteField,
   addCliente, removeCliente, clientesValidos, primerCliente,
 }) {
@@ -55,6 +56,9 @@ export function ClientesEnvioSection({
         </FormField>
         <FormField label="Fecha hasta">
           <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
+        </FormField>
+        <FormField label="Consumos">
+          <input type="number" min="0" step="1" value={consumos} onChange={(e) => setConsumos(e.target.value)} placeholder="Opcional" />
         </FormField>
       </div>
       {facturaSeleccionada && (

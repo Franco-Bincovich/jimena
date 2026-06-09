@@ -16,6 +16,7 @@ export function useFacturas() {
   const [confirmForm, setConfirmForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [deleteModal, setDeleteModal] = useState({ open: false, factura: null, mode: 'delete' })
+  const [uploadingManual, setUploadingManual] = useState(false)
   const { showToast, Toast } = useToast()
 
   useEffect(() => {
@@ -107,6 +108,29 @@ export function useFacturas() {
     }
   }
 
+  const handleSubirManual = async (file) => {
+    setUploadingManual(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      await api.post('/api/facturas/subir-manual', formData, {
+        headers: { 'Content-Type': undefined },
+      })
+      showToast('Factura cargada. Aparece en Pendientes de confirmar.')
+      const [newPend, newAll] = await Promise.all([
+        api.get('/api/facturas/pendientes'),
+        api.get('/api/facturas'),
+      ])
+      setPendientes(newPend)
+      setTodas(newAll)
+      setActiveTab('pendientes')
+    } catch (err) {
+      showToast(err?.message || 'Error al subir la factura', 'error')
+    } finally {
+      setUploadingManual(false)
+    }
+  }
+
   const handleDelete = async () => {
     const { factura, mode } = deleteModal
     try {
@@ -126,5 +150,6 @@ export function useFacturas() {
     proveedores, clientes, confirmModal, setConfirmModal, confirmForm, saving,
     deleteModal, setDeleteModal, Toast, handleBuscar,
     openConfirmar, toggleCliente, setField, handleConfirmar, handleDelete,
+    uploadingManual, handleSubirManual,
   }
 }
