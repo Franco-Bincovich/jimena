@@ -40,7 +40,16 @@ export function useEnviarFactura() {
 
   const setDatoField = (key, val) => setDatosManuales((prev) => ({ ...prev, [key]: val }))
 
-  const datosManualesPayload = !facturaId ? {
+  // Muestra el bloque de datos manuales cuando no hay factura seleccionada,
+  // o cuando la factura seleccionada le faltan proveedor o fechas de período.
+  const facturaFaltaDatos = facturaSeleccionada && (
+    !facturaSeleccionada.proveedor ||
+    !facturaSeleccionada.fecha_desde ||
+    !facturaSeleccionada.fecha_hasta
+  )
+  const necesitaDatosManuales = !facturaId || !!facturaFaltaDatos
+
+  const datosManualesPayload = necesitaDatosManuales ? {
     proveedor: datosManuales.proveedor || null,
     mes: datosManuales.mes ? MESES_NOMBRES[parseInt(datosManuales.mes) - 1] : null,
     anio: datosManuales.anio || null,
@@ -90,6 +99,26 @@ export function useEnviarFactura() {
       .finally(() => setLoadingInit(false))
   }, [])
 
+  // Cuando el usuario cambia la factura seleccionada, pre-popula datosManuales
+  // con los campos que la factura ya tiene (para que el usuario solo complete lo que falta).
+  useEffect(() => {
+    if (!facturaId) {
+      setDatosManuales({ proveedor: '', mes: '', anio: '', fechaDesde: '', fechaHasta: '', montoTotal: '', numeroFactura: '' })
+      return
+    }
+    const f = facturas.find((fac) => fac.id === facturaId)
+    if (!f) return
+    setDatosManuales({
+      proveedor: f.proveedor?.nombre || '',
+      mes: '',
+      anio: '',
+      fechaDesde: f.fecha_desde || '',
+      fechaHasta: f.fecha_hasta || '',
+      montoTotal: f.monto_total != null ? String(f.monto_total) : '',
+      numeroFactura: f.numero_factura || '',
+    })
+  }, [facturaId])
+
   const addCliente = () => setClienteItems((prev) => [...prev, { clienteId: '', monto: '' }])
   const removeCliente = (i) => setClienteItems((prev) => prev.filter((_, idx) => idx !== i))
   const setClienteField = (i, key, val) =>
@@ -135,5 +164,6 @@ export function useEnviarFactura() {
     cc, setCC, consumos, setConsumos, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,
+    necesitaDatosManuales,
   }
 }

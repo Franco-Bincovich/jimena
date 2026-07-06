@@ -20,6 +20,7 @@ export default function EnviarFactura() {
     cc, setCC, consumos, setConsumos, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,
+    necesitaDatosManuales,
   } = useEnviarFactura()
 
   if (loadingInit) return <EnviarSkeletonLoader />
@@ -49,7 +50,7 @@ export default function EnviarFactura() {
           clientesValidos={clientesValidos} primerCliente={primerCliente}
         />
 
-        {!facturaId && (
+        {necesitaDatosManuales && (
           <DatosManualesSection datosManuales={datosManuales} setDatoField={setDatoField} proveedores={proveedores} />
         )}
 

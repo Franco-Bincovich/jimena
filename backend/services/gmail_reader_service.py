@@ -162,7 +162,7 @@ def extraer_datos_factura(pdf_path: str) -> dict:
         from config.settings import settings  # lazy — evita falla en startup sin ANTHROPIC_API_KEY
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
         resp = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-haiku-4-5-20251001",
             max_tokens=500,
             system=_SYSTEM_PROMPT,
             messages=[{
