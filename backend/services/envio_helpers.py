@@ -28,6 +28,7 @@ class FacturaVacia:
     drive_url: None = None
     drive_file_id: None = None
     nombre_archivo: None = None
+    storage_key: None = None
 
 
 def resolver_clientes(clientes_input: list, db: Session) -> List[ClienteConMonto]:
@@ -42,19 +43,23 @@ def resolver_clientes(clientes_input: list, db: Session) -> List[ClienteConMonto
 
 
 def obtener_pdf_path(factura, db: Session) -> Optional[str]:
-    """Descarga el PDF desde Supabase Storage usando el SDK (no requiere bucket público)."""
-    if not factura.nombre_archivo:
+    """
+    Descarga el PDF desde Supabase Storage por su storage_key (clave interna limpia)
+    y lo guarda en /tmp con el nombre visible, para que el adjunto del correo se llame
+    exactamente como nombre_archivo (con % u otros chars). Retorna None si no hay PDF.
+    """
+    if not factura.storage_key:
         return None
     try:
         from services import storage_service  # lazy — evita importación circular
-        pdf_bytes = storage_service.descargar_pdf(factura.nombre_archivo)
+        pdf_bytes = storage_service.descargar_pdf(factura.storage_key)
         path = f"/tmp/{factura.nombre_archivo}"
         with open(path, "wb") as f:
             f.write(pdf_bytes)
         return path
     except Exception as exc:
         logger.error("Error descargando PDF de Supabase Storage",
-            extra={"archivo": factura.nombre_archivo, "error": str(exc)})
+            extra={"storage_key": factura.storage_key, "archivo": factura.nombre_archivo, "error": str(exc)})
         return None
 
 

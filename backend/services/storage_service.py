@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
+from urllib.parse import quote
 
 from supabase import Client, create_client
 
@@ -14,46 +15,50 @@ def get_supabase_client() -> Client:
     return create_client(settings.supabase_url, settings.supabase_service_key)
 
 
-def subir_pdf(file_path: str, nombre_destino: str) -> str:
+def build_storage_key(factura_id: str) -> str:
     """
-    Sube un PDF desde file_path al bucket 'Facturas' en Supabase Storage.
-    Si ya existe un archivo con ese nombre, agrega un timestamp al nombre para evitar colisiones.
-    Después de subir exitosamente, borra el archivo local de uploads/.
+    Construye la clave interna y única de Storage para una factura.
+    Formato limpio y URL-safe (nunca contiene el nombre visible con % del usuario).
 
-    Returns: URL pública del archivo subido.
+    Returns: Clave de objeto dentro del bucket, ej. 'facturas/{id}.pdf'.
+    """
+    return f"facturas/{factura_id}.pdf"
+
+
+def subir_pdf(file_path: str, storage_key: str) -> str:
+    """
+    Sube un PDF desde file_path al bucket 'Facturas' bajo la storage_key indicada.
+    Después de subir exitosamente, borra el archivo local de /tmp.
+    No captura errores: si la subida falla, propaga la excepción al caller.
+
+    Returns: URL pública del objeto subido.
     """
     client = get_supabase_client()
     with open(file_path, "rb") as f:
         pdf_bytes = f.read()
 
-    try:
-        client.storage.from_(BUCKET).upload(
-            nombre_destino, pdf_bytes, {"content-type": "application/pdf"}
-        )
-    except Exception:
-        base, ext = os.path.splitext(nombre_destino)
-        ts = int(datetime.now(timezone.utc).timestamp())
-        nombre_destino = f"{base}_{ts}{ext}"
-        client.storage.from_(BUCKET).upload(
-            nombre_destino, pdf_bytes, {"content-type": "application/pdf"}
-        )
-
-    url = client.storage.from_(BUCKET).get_public_url(nombre_destino).rstrip("?")
+    client.storage.from_(BUCKET).upload(
+        storage_key, pdf_bytes, {"content-type": "application/pdf"}
+    )
+    url = client.storage.from_(BUCKET).get_public_url(storage_key).rstrip("?")
 
     if os.path.exists(file_path):
         os.remove(file_path)
-    logger.info("PDF subido a Supabase Storage", extra={"archivo": nombre_destino})
+    logger.info("PDF subido a Supabase Storage", extra={"storage_key": storage_key})
     return url
 
 
-def descargar_pdf(nombre_archivo: str) -> bytes:
+def descargar_pdf(storage_key: str) -> bytes:
     """
-    Descarga un PDF desde el bucket 'Facturas' en Supabase Storage.
+    Descarga un PDF desde el bucket 'Facturas' por su storage_key.
+    quote(safe="/") protege claves legacy que puedan contener '%' u otros chars no seguros
+    (registros viejos rellenados con el nombre original). Asume que storage3 NO re-encodea
+    el path: pasa la key cruda a httpx, por eso la encodeamos nosotros acá.
 
     Returns: Bytes del archivo PDF.
     """
     client = get_supabase_client()
-    return client.storage.from_(BUCKET).download(nombre_archivo)
+    return client.storage.from_(BUCKET).download(quote(storage_key, safe="/"))
 
 
 def eliminar_pdf(nombre_archivo: str) -> bool:

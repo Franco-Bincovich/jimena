@@ -34,6 +34,7 @@ class ClienteSimple(BaseModel):
 class FacturaResponse(BaseModel):
     id: str
     nombre_archivo: str
+    storage_key: Optional[str] = None
     numero_factura: Optional[str] = None
     fecha_factura: Optional[datetime] = None
     fecha_desde: Optional[date] = None

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from models import _uuid
 from repositories import factura_repo
 from services.factura_helpers import intentar_subida_drive, intentar_url_supabase, to_dict
 from utils.errors import AppError
@@ -82,8 +83,8 @@ def confirmar(db: Session, factura_id: str, data) -> dict:
     nombre_prov = factura.proveedor.nombre if factura.proveedor else "Sin_Proveedor"
     intentar_subida_drive(factura.id, factura.nombre_archivo, nombre_prov, db)
     factura = factura_repo.find_by_id(db, factura_id)
-    if not factura.drive_url and factura.nombre_archivo:
-        intentar_url_supabase(factura.id, factura.nombre_archivo, db)
+    if not factura.drive_url and factura.storage_key:
+        intentar_url_supabase(factura.id, factura.storage_key, db)
         factura = factura_repo.find_by_id(db, factura_id)
     return to_dict(factura)
 
@@ -104,15 +105,15 @@ def eliminar(db: Session, factura_id: str) -> None:
     if not factura:
         raise AppError("Factura no encontrada", "FACTURA_NOT_FOUND", 404)
     pdf_path = os.path.join("/tmp", factura.nombre_archivo)
-    nombre_archivo = factura.nombre_archivo
+    storage_key = factura.storage_key or factura.nombre_archivo  # legacy: rows viejos con key = nombre
     factura_repo.delete(db, factura_id)
     if os.path.exists(pdf_path):
         os.remove(pdf_path)
     try:
         from services import storage_service  # lazy — evita importación circular
-        storage_service.eliminar_pdf(nombre_archivo)
+        storage_service.eliminar_pdf(storage_key)
     except Exception as exc:
-        logger.error("Error eliminando PDF de Supabase Storage", extra={"archivo": nombre_archivo, "error": str(exc)})
+        logger.error("Error eliminando PDF de Supabase Storage", extra={"storage_key": storage_key, "error": str(exc)})
 
 
 def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
@@ -128,8 +129,8 @@ def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
     Returns:
         Dict con factura_id, numero_factura, fecha_factura, monto_total, nombre_proveedor.
     """
-    stored_name = filename
-    pdf_path = os.path.join("/tmp", stored_name)
+    nombre_visible = filename  # nombre visible (con %), sin sanitizar
+    pdf_path = os.path.join("/tmp", nombre_visible)
     with open(pdf_path, "wb") as fh:
         fh.write(pdf_bytes)
 
@@ -146,22 +147,30 @@ def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
             except ValueError:
                 continue
 
+    # Subimos a Storage con clave interna limpia y confirmamos éxito ANTES de crear
+    # el registro: si la subida falla, propagamos el error y no dejamos factura huérfana.
+    from services import storage_service  # lazy — evita importación circular
+    factura_id = _uuid()
+    storage_key = storage_service.build_storage_key(factura_id)
+    try:
+        storage_url = storage_service.subir_pdf(pdf_path, storage_key)
+    except Exception as exc:
+        logger.error("Error subiendo PDF a Storage",
+            extra={"archivo": nombre_visible, "storage_key": storage_key, "error": str(exc)})
+        raise AppError("No se pudo subir el PDF a Storage", "STORAGE_UPLOAD_FAILED", 502)
+
     factura = factura_repo.create(db, {
-        "nombre_archivo": stored_name,
+        "id": factura_id,
+        "nombre_archivo": nombre_visible,
+        "storage_key": storage_key,
+        "drive_url": storage_url,
         "numero_factura": datos.get("numero_factura"),
         "fecha_factura": fecha_factura,
         "monto_total": datos.get("monto_total"),
         "estado": "pendiente_confirmacion",
     })
 
-    try:
-        from services import storage_service  # lazy — evita importación circular
-        storage_url = storage_service.subir_pdf(pdf_path, stored_name)
-        factura_repo.update(db, str(factura.id), {"drive_url": storage_url})
-    except Exception as exc:
-        logger.error("Error subiendo PDF a Storage", extra={"archivo": stored_name, "error": str(exc)})
-
-    logger.info("Factura subida manualmente", extra={"factura_id": str(factura.id), "archivo": stored_name})
+    logger.info("Factura subida manualmente", extra={"factura_id": str(factura.id), "archivo": nombre_visible})
     return {
         "factura_id": str(factura.id),
         "numero_factura": datos.get("numero_factura"),

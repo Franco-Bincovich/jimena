@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useToast } from '../components/Toast'
 import { usePreview } from './usePreview'
 import api from '../services/api'
@@ -23,6 +23,10 @@ export function useEnviarFactura() {
   })
   const [asunto, setAsunto] = useState('')
   const [cuerpo, setCuerpo] = useState('')
+  // Marcan si el usuario editó manualmente asunto/cuerpo. Si están tocados, el preview
+  // no debe pisar la edición. Se resetean al cambiar de factura.
+  const asuntoTocado = useRef(false)
+  const cuerpoTocado = useRef(false)
   const [fechaDesde, setFechaDesde] = useState('')
   const [fechaHasta, setFechaHasta] = useState('')
   const [cc, setCC] = useState([])
@@ -77,8 +81,12 @@ export function useEnviarFactura() {
     enabled: previewEnabled,
   })
 
-  useEffect(() => { if (previewAsunto) setAsunto(previewAsunto) }, [previewAsunto])
-  useEffect(() => { if (previewCuerpo) setCuerpo(previewCuerpo) }, [previewCuerpo])
+  useEffect(() => { if (previewAsunto && !asuntoTocado.current) setAsunto(previewAsunto) }, [previewAsunto])
+  useEffect(() => { if (previewCuerpo && !cuerpoTocado.current) setCuerpo(previewCuerpo) }, [previewCuerpo])
+
+  // Setters que usa la UI: marcan el campo como "tocado" para preservar la edición manual.
+  const editarAsunto = (val) => { asuntoTocado.current = true; setAsunto(val) }
+  const editarCuerpo = (val) => { cuerpoTocado.current = true; setCuerpo(val) }
 
   useEffect(() => {
     Promise.all([
@@ -102,6 +110,10 @@ export function useEnviarFactura() {
   // Cuando el usuario cambia la factura seleccionada, pre-popula datosManuales
   // con los campos que la factura ya tiene (para que el usuario solo complete lo que falta).
   useEffect(() => {
+    // Al cambiar de factura, la edición manual previa deja de aplicar: el preview
+    // vuelve a poder autocompletar asunto/cuerpo.
+    asuntoTocado.current = false
+    cuerpoTocado.current = false
     if (!facturaId) {
       setDatosManuales({ proveedor: '', mes: '', anio: '', fechaDesde: '', fechaHasta: '', montoTotal: '', numeroFactura: '' })
       return
@@ -140,8 +152,8 @@ export function useEnviarFactura() {
         })),
         fecha_desde: fechaDesde || null,
         fecha_hasta: fechaHasta || null,
-        asunto,
-        cuerpo,
+        asunto_override: asunto,
+        cuerpo_override: cuerpo,
         cc,
         consumos: consumos ? parseFloat(consumos) : null,
         datos_manuales: datosManualesPayload,
@@ -160,7 +172,7 @@ export function useEnviarFactura() {
     clientes, plantillas, proveedores, googleConnected, loadingInit,
     clienteItems, facturaId, setFacturaId, plantillaId, setPlantillaId,
     fechaDesde, setFechaDesde, fechaHasta, setFechaHasta,
-    datosManuales, setDatoField, asunto, setAsunto, cuerpo, setCuerpo,
+    datosManuales, setDatoField, asunto, setAsunto: editarAsunto, cuerpo, setCuerpo: editarCuerpo,
     cc, setCC, consumos, setConsumos, previewOpen, setPreviewOpen, sending, Toast,
     facturaSeleccionada, facturasDisponibles, clientesValidos, clientesUsados,
     primerCliente, previewLoading, handleEnviar, addCliente, removeCliente, setClienteField,

@@ -61,7 +61,8 @@ class Factura(Base):
     __tablename__ = "facturas"
 
     id = Column(String(36), primary_key=True, default=_uuid)
-    nombre_archivo = Column(String(500), nullable=False)
+    nombre_archivo = Column(String(500), nullable=False)  # nombre visible (con %, sin sanitizar): UI + adjunto del correo
+    storage_key = Column(String(500), nullable=True)      # clave interna limpia en Storage: facturas/{id}.pdf
     nombre_en_drive = Column(String(500), nullable=True)
     drive_file_id = Column(String(200), nullable=True)
     drive_url = Column(String(1000), nullable=True)

@@ -6,6 +6,7 @@ import anthropic
 from googleapiclient.discovery import build
 from sqlalchemy.orm import Session
 
+from models import _uuid
 from repositories import cliente_repo, factura_repo, proveedor_repo
 from services import google_auth_service
 from utils.logger import logger
@@ -84,9 +85,9 @@ def _procesar_mensaje(
     detectadas = []
     for adjunto in adjuntos:
         filename = adjunto["filename"]
-        stored_name = f"{message_id}_{filename}"
+        nombre_visible = f"{message_id}_{filename}"  # nombre visible (con %), para UI y adjunto del correo
 
-        existing = factura_repo.find_by_nombre_archivo(db, stored_name)
+        existing = factura_repo.find_by_nombre_archivo(db, nombre_visible)
         if existing and (existing.estado == "confirmada" or
                          (existing.numero_factura and existing.monto_total)):
             continue
@@ -98,11 +99,11 @@ def _procesar_mensaje(
                 userId="me", messageId=message_id, id=adjunto["body"]["attachmentId"]
             ).execute()
             pdf_bytes = base64.urlsafe_b64decode(data["data"])
-            pdf_path = os.path.join(_UPLOADS, stored_name)
+            pdf_path = os.path.join(_UPLOADS, nombre_visible)
             with open(pdf_path, "wb") as f:
                 f.write(pdf_bytes)
         except Exception as exc:
-            logger.error("Error descargando adjunto", extra={"archivo": stored_name, "error": str(exc)})
+            logger.error("Error descargando adjunto", extra={"archivo": nombre_visible, "error": str(exc)})
             continue
 
         datos = extraer_datos_factura(pdf_path)
@@ -120,8 +121,23 @@ def _procesar_mensaje(
                 except ValueError:
                     fecha_factura = None
 
+        # Subimos a Storage con clave interna limpia y confirmamos éxito ANTES de
+        # crear el registro: si la subida falla, no dejamos una factura huérfana.
+        from services import storage_service  # lazy — evita importación circular
+        factura_id = _uuid()
+        storage_key = storage_service.build_storage_key(factura_id)
+        try:
+            storage_url = storage_service.subir_pdf(pdf_path, storage_key)
+        except Exception as exc:
+            logger.error("Error subiendo PDF a Supabase Storage",
+                extra={"archivo": nombre_visible, "storage_key": storage_key, "error": str(exc)})
+            continue
+
         factura = factura_repo.create(db, {
-            "nombre_archivo": stored_name,
+            "id": factura_id,
+            "nombre_archivo": nombre_visible,
+            "storage_key": storage_key,
+            "drive_url": storage_url,
             "proveedor_id": proveedor.id,
             "gmail_message_id": message_id,
             "numero_factura": datos.get("numero_factura"),
@@ -132,15 +148,8 @@ def _procesar_mensaje(
         if cliente:
             factura_repo.create_cliente_asociado(db, factura.id, cliente.id)
 
-        try:
-            from services import storage_service  # lazy — evita importación circular
-            storage_url = storage_service.subir_pdf(pdf_path, stored_name)
-            factura_repo.update(db, factura.id, {"drive_url": storage_url})
-        except Exception as exc:
-            logger.error("Error subiendo PDF a Supabase Storage", extra={"archivo": stored_name, "error": str(exc)})
-
-        logger.info("Factura detectada", extra={"proveedor": proveedor.nombre, "archivo": stored_name})
-        detectadas.append({"factura_id": factura.id, "proveedor": proveedor.nombre, "archivo": stored_name})
+        logger.info("Factura detectada", extra={"proveedor": proveedor.nombre, "archivo": nombre_visible})
+        detectadas.append({"factura_id": factura.id, "proveedor": proveedor.nombre, "archivo": nombre_visible})
 
     return detectadas or None
 

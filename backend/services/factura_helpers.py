@@ -21,6 +21,7 @@ def to_dict(factura) -> dict:
     return {
         "id": factura.id,
         "nombre_archivo": factura.nombre_archivo,
+        "storage_key": factura.storage_key,
         "numero_factura": factura.numero_factura,
         "fecha_factura": factura.fecha_factura,
         "fecha_desde": factura.fecha_desde,
@@ -53,12 +54,12 @@ def intentar_subida_drive(factura_id: str, nombre_archivo: str, nombre_proveedor
         logger.error("Error subiendo a Drive (best-effort)", extra={"factura_id": factura_id, "error": str(exc)})
 
 
-def intentar_url_supabase(factura_id: str, nombre_archivo: str, db) -> None:
-    """Actualiza drive_url con la URL pública de Supabase Storage como fallback."""
+def intentar_url_supabase(factura_id: str, storage_key: str, db) -> None:
+    """Actualiza drive_url con la URL pública de Supabase Storage (por storage_key) como fallback."""
     try:
         from services import storage_service  # lazy — evita importación circular
         client = storage_service.get_supabase_client()
-        url = client.storage.from_("Facturas").get_public_url(nombre_archivo).rstrip("?")
+        url = client.storage.from_("Facturas").get_public_url(storage_key).rstrip("?")
         factura_repo.update(db, factura_id, {"drive_url": url})
     except Exception as exc:
         logger.error("Error obteniendo URL de Supabase Storage", extra={"factura_id": factura_id, "error": str(exc)})
