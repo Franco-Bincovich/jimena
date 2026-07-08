@@ -1,8 +1,25 @@
 import os
+from datetime import date, datetime
 from typing import Optional
 
 from repositories import factura_repo
 from utils.logger import logger
+
+
+def parse_fecha(s) -> Optional[date]:
+    """
+    Convierte un string de fecha a date. Acepta DD/MM/YYYY o YYYY-MM-DD.
+    Devuelve None si el valor es vacío, no es str o no matchea ningún formato.
+    Único punto de parseo de fechas compartido por los callers de extracción.
+    """
+    if not s or not isinstance(s, str):
+        return None
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    return None
 
 
 def to_dict(factura) -> dict:

@@ -1,4 +1,4 @@
-import base64, json, os
+import base64, os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -9,10 +9,40 @@ from sqlalchemy.orm import Session
 from models import _uuid
 from repositories import cliente_repo, factura_repo, proveedor_repo
 from services import google_auth_service
+from services.factura_helpers import parse_fecha
 from utils.logger import logger
 
 _UPLOADS = "/tmp"
-_SYSTEM_PROMPT = "Eres un extractor de datos de facturas. Devuelve ÚNICAMENTE un JSON válido con estos campos: numero_factura (str), fecha_factura (str DD/MM/YYYY), monto_total (float), cuit_cliente (str solo números sin guiones), nombre_proveedor (str). Usa null para los campos que no puedas extraer. Sin texto adicional fuera del JSON."
+_SYSTEM_PROMPT = (
+    "Eres un extractor de datos de facturas. Analizá el PDF y registrá los datos "
+    "mediante la herramienta registrar_factura. Las fechas en formato DD/MM/YYYY. "
+    "Para el período facturado usá fecha_desde/fecha_hasta si el comprobante lo indica. "
+    "Usá null en los campos que no puedas determinar con certeza."
+)
+
+_TOOL = {
+    "name": "registrar_factura",
+    "description": "Registra los datos extraídos de una factura.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "numero_factura": {"type": ["string", "null"], "description": "Número de comprobante"},
+            "fecha_factura": {"type": ["string", "null"], "description": "Fecha de emisión DD/MM/YYYY"},
+            "monto_total": {"type": ["number", "null"], "description": "Importe total"},
+            "cuit_cliente": {"type": ["string", "null"], "description": "CUIT del cliente, solo números sin guiones"},
+            "nombre_proveedor": {"type": ["string", "null"], "description": "Razón social del emisor"},
+            "fecha_desde": {"type": ["string", "null"], "description": "Inicio del período facturado DD/MM/YYYY, si figura"},
+            "fecha_hasta": {"type": ["string", "null"], "description": "Fin del período facturado DD/MM/YYYY, si figura"},
+        },
+        "required": ["numero_factura", "fecha_factura", "monto_total"],
+    },
+}
+
+_VACIO = {
+    "numero_factura": None, "fecha_factura": None, "monto_total": None,
+    "cuit_cliente": None, "nombre_proveedor": None,
+    "fecha_desde": None, "fecha_hasta": None,
+}
 
 
 def _encontrar_adjuntos_pdf(parts: list) -> list[dict]:
@@ -110,16 +140,9 @@ def _procesar_mensaje(
         cuit = datos.get("cuit_cliente")
         cliente = cliente_repo.find_by_cuit(db, cuit) if cuit else None
 
-        fecha_str = datos.get("fecha_factura") or fecha_mail
-        fecha_factura = None
-        if fecha_str and isinstance(fecha_str, str):
-            try:
-                fecha_factura = datetime.strptime(fecha_str, "%d/%m/%Y").date()
-            except ValueError:
-                try:
-                    fecha_factura = datetime.strptime(fecha_str, "%Y-%m-%d").date()
-                except ValueError:
-                    fecha_factura = None
+        fecha_factura = parse_fecha(datos.get("fecha_factura") or fecha_mail)
+        fecha_desde = parse_fecha(datos.get("fecha_desde"))
+        fecha_hasta = parse_fecha(datos.get("fecha_hasta"))
 
         # Subimos a Storage con clave interna limpia y confirmamos éxito ANTES de
         # crear el registro: si la subida falla, no dejamos una factura huérfana.
@@ -142,6 +165,8 @@ def _procesar_mensaje(
             "gmail_message_id": message_id,
             "numero_factura": datos.get("numero_factura"),
             "fecha_factura": fecha_factura,
+            "fecha_desde": fecha_desde,
+            "fecha_hasta": fecha_hasta,
             "monto_total": datos.get("monto_total"),
             "estado": "pendiente_confirmacion",
         })
@@ -161,9 +186,13 @@ def extraer_datos_factura(pdf_path: str) -> dict:
     System prompt separado del user input (SEGURIDAD-PENTEST.md 6.1).
 
     Returns: dict con numero_factura, fecha_factura, monto_total, cuit_cliente,
-             nombre_proveedor. Campos no extraíbles como null.
+             nombre_proveedor, fecha_desde, fecha_hasta. Campos no extraíbles como null.
+
+    Usa tool use (structured output): la respuesta llega como dict validado contra
+    el schema de la tool, sin parsear texto libre. Nunca lanza: ante fallo (sin
+    bloque tool_use o excepción) loguea la respuesta cruda y devuelve _VACIO, para
+    que el caller cree la factura vacía y se complete a mano.
     """
-    _vacio = {"numero_factura": None, "fecha_factura": None, "monto_total": None}
     try:
         with open(pdf_path, "rb") as f:
             pdf_b64 = base64.b64encode(f.read()).decode()
@@ -172,8 +201,10 @@ def extraer_datos_factura(pdf_path: str) -> dict:
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
         resp = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=500,
+            max_tokens=1024,
             system=_SYSTEM_PROMPT,
+            tools=[_TOOL],
+            tool_choice={"type": "tool", "name": "registrar_factura"},
             messages=[{
                 "role": "user",
                 "content": [{
@@ -186,13 +217,18 @@ def extraer_datos_factura(pdf_path: str) -> dict:
                 }]
             }],
         )
-        raw = resp.content[0].text.strip()
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        return json.loads(raw.strip())
+        bloque = next((b for b in resp.content if b.type == "tool_use"), None)
+        if bloque is None:
+            logger.error("Extracción sin bloque tool_use",
+                         extra={"pdf_path": pdf_path, "raw": str(resp.content)})
+            return dict(_VACIO)
+
+        datos = {**_VACIO, **(bloque.input or {})}
+        if datos["numero_factura"] is None and datos["monto_total"] is None:
+            logger.warning("Extracción sin datos clave",
+                           extra={"pdf_path": pdf_path, "input": bloque.input})
+        return datos
     except Exception as exc:
         logger.error("Error extrayendo datos de PDF",
                      extra={"pdf_path": pdf_path, "error": str(exc), "tipo": type(exc).__name__})
-        return _vacio
+        return dict(_VACIO)

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from models import _uuid
 from repositories import factura_repo
-from services.factura_helpers import intentar_subida_drive, intentar_url_supabase, to_dict
+from services.factura_helpers import intentar_subida_drive, intentar_url_supabase, parse_fecha, to_dict
 from utils.errors import AppError
 from utils.logger import logger
 
@@ -137,15 +137,9 @@ def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
     from services import gmail_reader_service  # lazy — evita importación circular
     datos = gmail_reader_service.extraer_datos_factura(pdf_path)
 
-    fecha_factura = None
-    fecha_str = datos.get("fecha_factura")
-    if fecha_str:
-        for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
-            try:
-                fecha_factura = datetime.strptime(fecha_str, fmt).date()
-                break
-            except ValueError:
-                continue
+    fecha_factura = parse_fecha(datos.get("fecha_factura"))
+    fecha_desde = parse_fecha(datos.get("fecha_desde"))
+    fecha_hasta = parse_fecha(datos.get("fecha_hasta"))
 
     # Subimos a Storage con clave interna limpia y confirmamos éxito ANTES de crear
     # el registro: si la subida falla, propagamos el error y no dejamos factura huérfana.
@@ -166,6 +160,8 @@ def subir_manual(db: Session, pdf_bytes: bytes, filename: str) -> dict:
         "drive_url": storage_url,
         "numero_factura": datos.get("numero_factura"),
         "fecha_factura": fecha_factura,
+        "fecha_desde": fecha_desde,
+        "fecha_hasta": fecha_hasta,
         "monto_total": datos.get("monto_total"),
         "estado": "pendiente_confirmacion",
     })
